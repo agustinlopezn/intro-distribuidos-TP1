@@ -1,11 +1,8 @@
-from lib.protocol_handler import OperationCodes
-
-
 class Packet:
     __abstract__ = True
 
     @staticmethod
-    def generate_packet(self, data):
+    def generate_packet(self, **kwargs):
         raise NotImplementedError
 
     @staticmethod
@@ -14,9 +11,8 @@ class Packet:
 
     @staticmethod
     def get_op_code(data):
-        return int(data[0])
+        raise NotImplementedError
 
     @staticmethod
     def create_server_information(port):
-        msg = str(OperationCodes.SV_INFORMATION) + str(port)
-        return msg.encode()
+        raise NotImplementedError

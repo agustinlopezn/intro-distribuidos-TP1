@@ -13,10 +13,10 @@ class Accepter:
 
     def listen(self, buff_size):
         msg, client_address = self.socket.recvfrom(buff_size)
-        op_code = self.packet_type.get_op_code(msg.decode())
+        op_code = self.packet_type.get_op_code(msg)
         if op_code not in (OperationCodes.DOWNLOAD, OperationCodes.UPLOAD):
             raise Exception("Invalid operation code")
-        client = self.socket_type(client_address, self.packet_type)
+        client = self.socket_type(client_address, timeout=1)
         self.socket.sendto(
             self.packet_type.create_server_information(client.port), client_address
         )
