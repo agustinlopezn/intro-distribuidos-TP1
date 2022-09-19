@@ -4,11 +4,13 @@ from lib.protocol_handler import OperationCodes
 class Packet:
     __abstract__ = True
 
-    def generate_packet(self):
-        pass
+    @staticmethod
+    def generate_packet(self, data):
+        raise NotImplementedError
 
-    def parse_packet(self):
-        pass
+    @staticmethod
+    def parse_packet(self, packet):
+        raise NotImplementedError
 
     @staticmethod
     def get_op_code(data):

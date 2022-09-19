@@ -1,19 +1,21 @@
-import socket
+from socket import socket, AF_INET, SOCK_DGRAM, timeout
 
 
 class CustomSocket:
     __abstract__ = True
 
-    def __init__(self, client_address):
+    def __init__(self, client_address, packet_type):
         self.client_address = client_address
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.bind(("", 0)) # Bind to a random port
+        self.packet_type = packet_type
+        self.socket = socket(AF_INET, SOCK_DGRAM)
+        self.socket.bind(("", 0))  # Bind to a random port
+        self.socket.settimeout(2)
 
     def send(self, message):
-        self.socket.sendto(message, self.client_address)
+        raise NotImplementedError
 
     def receive(self):
-        return self.socket.recvfrom(512)
+        raise NotImplementedError
 
     @property
     def port(self):

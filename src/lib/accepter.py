@@ -16,7 +16,7 @@ class Accepter:
         op_code = self.packet_type.get_op_code(msg.decode())
         if op_code not in (OperationCodes.DOWNLOAD, OperationCodes.UPLOAD):
             raise Exception("Invalid operation code")
-        client = self.socket_type(client_address)
+        client = self.socket_type(client_address, self.packet_type)
         self.socket.sendto(
             self.packet_type.create_server_information(client.port), client_address
         )
