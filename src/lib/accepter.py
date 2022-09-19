@@ -12,10 +12,12 @@ class Accepter:
         self.socket.bind((self.host, self.port))
 
     def listen(self, buff_size):
-        msg, address = self.socket.recvfrom(buff_size)
+        msg, client_address = self.socket.recvfrom(buff_size)
         op_code = self.packet_type.get_op_code(msg.decode())
         if op_code not in (OperationCodes.DOWNLOAD, OperationCodes.UPLOAD):
             raise Exception("Invalid operation code")
-        client = self.socket_type(address)
-        return op_code, client, address
-
+        client = self.socket_type(client_address)
+        self.socket.sendto(
+            self.packet_type.create_server_information(client.port), client_address
+        )
+        return op_code, client, client_address

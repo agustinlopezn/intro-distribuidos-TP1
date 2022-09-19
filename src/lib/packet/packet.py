@@ -1,3 +1,6 @@
+from lib.protocol_handler import OperationCodes
+
+
 class Packet:
     __abstract__ = True
 
@@ -10,3 +13,8 @@ class Packet:
     @staticmethod
     def get_op_code(data):
         return int(data[0])
+
+    @staticmethod
+    def create_server_information(port):
+        msg = str(OperationCodes.SV_INFORMATION) + str(port)
+        return msg.encode()

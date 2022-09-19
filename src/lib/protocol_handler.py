@@ -8,4 +8,7 @@ class OperationCodes:
     ACK = 5
     ERROR = 6
     END = 7
+
+SAW_CHUNK_SIZE = 512
+GBN_CHUNK_SIZE = 512
     
