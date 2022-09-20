@@ -20,12 +20,30 @@ class SaWSocket(CustomSocket):
         )
         self._send(packet)
 
-    def send_cl_information(self, file_name):
+    def send_cl_information(self, data):
         packet = self.packet_type.generate_packet(
             op_code=OperationCodes.CL_INFORMATION,
             seq_number=0,
             ack_number=0,
-            data=file_name.encode(),
+            data=data.encode(),
+        )
+        self._send(packet)
+
+    def send_up_request(self):
+        packet = self.packet_type.generate_packet(
+            op_code=OperationCodes.UPLOAD,
+            seq_number=0,
+            ack_number=0,
+            data="".encode()
+        )
+        self._send(packet)
+
+    def send_end(self):
+        packet = self.packet_type.generate_packet(
+            op_code=OperationCodes.END,
+            seq_number=0,
+            ack_number=0,
+            data="".encode()
         )
         self._send(packet)
 
