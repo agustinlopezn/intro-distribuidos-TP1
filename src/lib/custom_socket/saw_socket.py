@@ -31,19 +31,13 @@ class SaWSocket(CustomSocket):
 
     def send_up_request(self):
         packet = self.packet_type.generate_packet(
-            op_code=OperationCodes.UPLOAD,
-            seq_number=0,
-            ack_number=0,
-            data="".encode()
+            op_code=OperationCodes.UPLOAD, seq_number=0, ack_number=0, data="".encode()
         )
         self._send(packet)
 
     def send_end(self):
         packet = self.packet_type.generate_packet(
-            op_code=OperationCodes.END,
-            seq_number=0,
-            ack_number=0,
-            data="".encode()
+            op_code=OperationCodes.END, seq_number=0, ack_number=0, data="".encode()
         )
         self._send(packet)
 

@@ -1,8 +1,8 @@
 from socket import *
 
 from lib.accepter import Accepter
-from lib.file_handler.file_downloader import FileDownloader
-from lib.file_handler.file_uploader import FileUploader
+from lib.file_handler.file_sender import FileSender
+from lib.file_handler.file_receiver import FileReceiver
 from lib.packet.gbn_packet import GBNPacket
 from lib.packet.saw_packet import SaWPacket
 from lib.protocol_handler import OperationCodes
@@ -26,6 +26,6 @@ accepter = Accepter(HOST, PORT, packet_type, socket_type)
 while True:
     op_code, client, address = accepter.listen(BUFF_SIZE)
     if op_code == OperationCodes.DOWNLOAD:
-        FileDownloader(client, address).start()
+        FileSender(client, address).start()
     else:
-        FileUploader(client, address).start()
+        FileReceiver(client, address).start()
