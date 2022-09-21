@@ -1,7 +1,7 @@
 import threading
 
 
-class FileHandler(threading.Thread):
+class FileHandler():
     def __init__(self, socket, client_address):
         super().__init__()
         self.socket = socket

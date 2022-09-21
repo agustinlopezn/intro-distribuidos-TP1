@@ -6,18 +6,11 @@ class FileReceiver(FileHandler):
     def __init__(self, socket, client_address):
         super().__init__(socket, client_address)
 
-    def run(self):
-        recv_file(self.socket)
+    def recv_file(self, file_name):
+        recv_file(self.socket, file_name=file_name)
 
 
-def recv_file(socket):
-    op_code, seq_number, ack_number, data = socket.receive()
-    if op_code != OperationCodes.FILE_INFORMATION:
-        raise Exception
-
-    file_name, size = data.decode().split("#")
-    # Check size limits before sending ACK
-    socket.send_ack()
+def recv_file(socket, file_name):
     with open(f"{file_name}", "wb") as f:
         while True:
             op_code, seq_number, ack_number, data = socket.receive()
