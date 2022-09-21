@@ -1,12 +1,13 @@
 import os
 from lib.file_handler.file_sender import FileSender
-from lib.process_handler.server_handler import ServerHandler
+from lib.process_handler.server.server_handler import ServerHandler
 from lib.protocol_handler import OperationCodes
 
+SRC_FOLDER = "../files/uploaded/"
 
 class ServerDownloadHandler(ServerHandler):
     def __init__(self, socket, client_address):
-        self.file_sender = FileSender(socket, client_address)
+        self.file_sender = FileSender(socket, client_address, SRC_FOLDER)
         super().__init__(socket, client_address)
 
     def run(self):

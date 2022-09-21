@@ -2,13 +2,16 @@ from lib.protocol_handler import OperationCodes
 from .file_handler import FileHandler
 import os
 
+SRC_FOLDER = "../files/downloaded"
+
 
 class FileSender(FileHandler):
-    def __init__(self, socket, client_address):
+    def __init__(self, socket, client_address, source_folder):
+        self.source_folder = source_folder
         super().__init__(socket, client_address)
 
     def send_file(self, file_name):
-        with open(f"../files/{file_name}", "rb") as file:
+        with open(f"{self.source_folder}/{file_name}", "rb") as file:
             while True:
                 data = file.read(512)
                 try:
@@ -23,24 +26,5 @@ class FileSender(FileHandler):
             print("Data sent successfully")
 
     def get_file_size(self, file_name):
-        return os.stat(f"../files/{file_name}").st_size
-
-
-def send_file_client(file_name, socket):
-    with open(f"../files/{file_name}", "rb") as file:
-        file_stats = os.stat(file_name)
-        socket.send_file_information(file_name=file_name, file_size=file_stats.st_size)
-        # no need to send name back to client
-        while True:
-            data = file.read(512)
-            try:
-                socket.send_data(data)
-            except Exception as e:
-                print(e)
-                break
-            if not data:
-                break
-        socket.send_end()
-        socket.socket.close()
-        print("Data sent successfully")
+        return os.stat(f"{self.source_folder}/{file_name}").st_size
 
