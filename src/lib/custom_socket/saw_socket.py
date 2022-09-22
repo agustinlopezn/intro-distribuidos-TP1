@@ -12,22 +12,9 @@ class SaWSocket(CustomSocket):
         return b_s
 
     def send_dl_request(self):
-        packet = self.packet_type.generate_packet(
-            op_code=OperationCodes.DOWNLOAD,
-            seq_number=0,
-            ack_number=0,
-            data="".encode(),
-        )
-        self._send(packet)
-
-    def send_cl_information(self, data):
-        packet = self.packet_type.generate_packet(
-            op_code=OperationCodes.FILE_INFORMATION,
-            seq_number=0,
-            ack_number=0,
-            data=data.encode(),
-        )
-        self._send(packet)
+        op_code = OperationCodes.DOWNLOAD
+        expected_response_code = OperationCodes.SV_INFORMATION
+        return self._send_and_wait(op_code, "".encode(), expected_response_code)
 
     def send_up_request(self):
         packet = self.packet_type.generate_packet(
@@ -57,21 +44,8 @@ class SaWSocket(CustomSocket):
         self._send(packet)
 
     def send_data(self, data):
-        attemps = 3
-        while attemps > 0:
-            try:
-                packet = self.packet_type.generate_packet(
-                    op_code=OperationCodes.DATA, seq_number=0, ack_number=0, data=data
-                )
-                self._send(packet)
-                op_code, seq_number, ack_number, data = self.receive()
-                if op_code == OperationCodes.ACK:
-                    return
-                raise timeout
-            except timeout:
-                attemps -= 1
-                print("TIMEOUT! Retrying...")
-        raise Exception("Connection timed out")
+        op_code = OperationCodes.DATA
+        return self._send_and_wait(op_code, data)
 
     def receive(self):
         data, address = self.socket.recvfrom(1024)
@@ -85,21 +59,26 @@ class SaWSocket(CustomSocket):
         return f"{file_name}#{file_size}".encode()
 
     def send_file_information(self, file_name=None, file_size=None):
-        attemps = 3
-        # below lines need to be a separate function
         file_information = self.serialize_file_information(file_name, file_size)
+        op_code = OperationCodes.FILE_INFORMATION
+        expected_response_code = (
+            OperationCodes.ACK
+            if file_size is not None
+            else OperationCodes.FILE_INFORMATION
+        )
+        self._send_and_wait(op_code, file_information, expected_response_code)
+
+    def _send_and_wait(self, op_code, data, expected_response_code=OperationCodes.ACK):
+        attemps = 3
         while attemps > 0:
             try:
                 packet = self.packet_type.generate_packet(
-                    op_code=OperationCodes.FILE_INFORMATION,
-                    seq_number=0,
-                    ack_number=0,
-                    data=file_information,
+                    op_code=op_code, seq_number=0, ack_number=0, data=data
                 )
                 self._send(packet)
-                op_code, seq_number, ack_number, data = self.receive()
-                if op_code == OperationCodes.ACK or op_code == OperationCodes.FILE_INFORMATION:
-                    return
+                rcvd_op_code, seq_number, ack_number, data = self.receive()
+                if rcvd_op_code == expected_response_code:
+                    return data
                 raise timeout
             except timeout:
                 attemps -= 1

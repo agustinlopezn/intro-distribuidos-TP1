@@ -21,16 +21,10 @@ class ClientDownloadHandler(ClientHandler):
 
     def handle_process_start(self, file_name):
         port = PORT
-        self.socket.send_dl_request()
-        op_code, seq_number, ack_number, data = self.socket.receive()
+        data = self.socket.send_dl_request()
         port = int(data.decode())
         self.socket.opposite_address = ("localhost", port)
         self.socket.send_file_information(file_name=file_name)
-        op_code, seq_number, ack_number, data = self.socket.receive()
-
-        if op_code != OperationCodes.FILE_INFORMATION:
-            raise Exception
-
         file_size = int(data.decode())
         # Check size limits before sending ACK
         self.socket.send_ack()
