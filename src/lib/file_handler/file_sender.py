@@ -12,18 +12,18 @@ class FileSender(FileHandler):
 
     def send_file(self, file_name):
         with open(f"{self.source_folder}/{file_name}", "rb") as file:
+            bytes_sent = 0
             while True:
                 data = file.read(512)
+                if not data:
+                    break
                 try:
                     self.socket.send_data(data)
+                    bytes_sent += len(data)
                 except Exception as e:
                     print(e)
                     break
-                if not data:
-                    break
-            self.socket.send_end()
-            self.socket.socket.close()
-            print("Data sent successfully")
+            return bytes_sent
 
     def get_file_size(self, file_name):
         return os.stat(f"{self.source_folder}/{file_name}").st_size

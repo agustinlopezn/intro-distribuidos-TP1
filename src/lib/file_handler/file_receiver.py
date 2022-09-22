@@ -8,11 +8,14 @@ class FileReceiver(FileHandler):
 
     def receive_file(self, file_name):
         with open(f"{self.destination_folder}/{file_name}", "wb") as f:
+            bytes_received = 0
             while True:
-                op_code, seq_number, ack_number, data = self.socket.receive()
+                op_code, data = self.socket.receive()
                 self.socket.send_ack()
                 if op_code == OperationCodes.END:
+                    print("Ending connection")
                     break
                 f.write(data)
-            self.socket.socket.close()
+                bytes_received += len(data)
+            return bytes_received
 

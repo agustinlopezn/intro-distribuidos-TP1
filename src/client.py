@@ -19,4 +19,5 @@ def upload():
 
 
 upload()
+print("Uploaded")
 download()

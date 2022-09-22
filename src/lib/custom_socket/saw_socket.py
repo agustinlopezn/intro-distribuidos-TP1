@@ -49,7 +49,8 @@ class SaWSocket(CustomSocket):
 
     def receive(self):
         data, address = self.socket.recvfrom(1024)
-        return self.packet_type.parse_packet(data)
+        op_code, seq_number, ack_number, data = self.packet_type.parse_packet(data)
+        return op_code, data
 
     def serialize_file_information(self, file_name, file_size):
         if not file_size:
@@ -66,7 +67,7 @@ class SaWSocket(CustomSocket):
             if file_size is not None
             else OperationCodes.FILE_INFORMATION
         )
-        self._send_and_wait(op_code, file_information, expected_response_code)
+        return self._send_and_wait(op_code, file_information, expected_response_code)
 
     def _send_and_wait(self, op_code, data, expected_response_code=OperationCodes.ACK):
         attemps = 3
@@ -76,7 +77,7 @@ class SaWSocket(CustomSocket):
                     op_code=op_code, seq_number=0, ack_number=0, data=data
                 )
                 self._send(packet)
-                rcvd_op_code, seq_number, ack_number, data = self.receive()
+                rcvd_op_code, data = self.receive()
                 if rcvd_op_code == expected_response_code:
                     return data
                 raise timeout
@@ -84,3 +85,16 @@ class SaWSocket(CustomSocket):
                 attemps -= 1
                 print("TIMEOUT! Retrying...")
         raise Exception("Connection timed out")
+
+    def close_connection(self, total_bytes, expected_bytes):
+        try:
+            self.send_end()
+            print("Connection closed successfully")
+        except Exception as e:
+            if total_bytes == expected_bytes:
+                print("Data sent/received successfully")
+            else:
+                print(e)
+            print(e)
+        finally:
+            self.socket.close()

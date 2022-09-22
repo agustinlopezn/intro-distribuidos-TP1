@@ -15,14 +15,15 @@ class ClientUploadHandler(ClientHandler):
 
     def handle_upload(self, file_name):
         self.handle_process_start(file_name)
-        self.file_sender.send_file(file_name)
+        bytes_sent = self.file_sender.send_file(file_name)
+        self.socket.close_connection(bytes_sent, self.file_size)
 
     def handle_process_start(self, file_name):
         port = PORT
         self.socket.send_up_request()
-        op_code, seq_number, ack_number, data = self.socket.receive()
+        op_code, data = self.socket.receive()
         port = int(data.decode())
         self.socket.opposite_address = ("localhost", port)
 
-        file_size = self.file_sender.get_file_size(file_name)
-        self.socket.send_file_information(file_name=file_name, file_size=file_size)
+        self.file_size = self.file_sender.get_file_size(file_name)
+        self.socket.send_file_information(file_name=file_name, file_size=self.file_size)

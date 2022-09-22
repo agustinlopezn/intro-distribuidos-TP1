@@ -17,14 +17,28 @@ class ClientDownloadHandler(ClientHandler):
 
     def handle_download(self, file_name):
         self.handle_process_start(file_name)
-        self.file_receiver.receive_file(file_name)
+        bytes_received = self.file_receiver.receive_file(file_name)
+        self.socket.close_connection(bytes_received, self.file_size)
 
     def handle_process_start(self, file_name):
         port = PORT
         data = self.socket.send_dl_request()
         port = int(data.decode())
         self.socket.opposite_address = ("localhost", port)
-        self.socket.send_file_information(file_name=file_name)
-        file_size = int(data.decode())
+        data = self.socket.send_file_information(file_name=file_name)
+        self.file_size = int(data.decode())
         # Check size limits before sending ACK
         self.socket.send_ack()
+
+    def close_connection(self, bytes_received):
+        try:
+            self.socket.send_end()
+        except Exception as e:
+            if bytes_received == self.file_size:
+                print("File sent successfully")
+            else:
+                print(e)
+        finally:
+            print("Bytes received: ", bytes_received)
+            self.socket.socket.close()
+

@@ -5,6 +5,7 @@ from lib.protocol_handler import OperationCodes
 
 SRC_FOLDER = "../files/uploaded/"
 
+
 class ServerDownloadHandler(ServerHandler):
     def __init__(self, socket, client_address):
         self.file_sender = FileSender(socket, client_address, SRC_FOLDER)
@@ -12,13 +13,15 @@ class ServerDownloadHandler(ServerHandler):
 
     def run(self):
         self.handle_process_start()
-        self.file_sender.send_file(self.file_name)
+        bytes_sent = self.file_sender.send_file(self.file_name)
+        self.socket.close_connection(bytes_sent, self.file_size)
 
     def handle_process_start(self):
-        op_code, seq_number, ack_number, data = self.socket.receive()
+        op_code, data = self.socket.receive()
         if op_code != OperationCodes.FILE_INFORMATION:
             raise Exception
 
         self.file_name = data.decode()
         file_size = self.file_sender.get_file_size(self.file_name)
         self.socket.send_file_information(file_size=file_size)
+        self.file_size = file_size
