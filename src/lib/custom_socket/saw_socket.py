@@ -93,15 +93,6 @@ class SaWSocket(CustomSocket):
                 print("TIMEOUT! Retrying...")
         raise Exception("Connection timed out")
 
-    def close_connection(self, total_bytes, expected_bytes):
-        try:
-            self.send_end()
-            print("Connection closed successfully")
-        except Exception as e:
-            if total_bytes == expected_bytes:
-                print("Data sent/received successfully")
-            else:
-                print(e)
-            print(e)
-        finally:
+    def close_connection(self):
             self.socket.close()
+            print("Connection closed successfully")

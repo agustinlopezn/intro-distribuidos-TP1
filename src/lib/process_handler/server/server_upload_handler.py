@@ -15,8 +15,8 @@ class ServerUploadHandler(ServerHandler):
 
     def run(self):
         self.handle_process_start()
-        bytes_received = self.file_receiver.receive_file(self.file_name)
-        self.socket.close_connection(bytes_received, self.file_size)
+        self.file_receiver.receive_file(self.file_name, self.file_size)
+        self.socket.close_connection()
 
     def handle_process_start(self):
         op_code, data = self.socket.receive()
@@ -28,5 +28,4 @@ class ServerUploadHandler(ServerHandler):
         self.file_name = file_name
         self.socket.send_ack()
         self.file_size = int(size)
-        print("File Size: ", self.file_size)
 

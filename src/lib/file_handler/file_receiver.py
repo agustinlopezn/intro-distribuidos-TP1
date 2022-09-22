@@ -6,15 +6,12 @@ class FileReceiver(FileHandler):
         self.destination_folder = destination_folder
         super().__init__(socket, client_address)
 
-    def receive_file(self, file_name):
+    def receive_file(self, file_name, file_size):
         with open(f"{self.destination_folder}/{file_name}", "wb") as f:
             bytes_received = 0
-            while True:
+            while bytes_received < file_size:
                 op_code, data = self.socket.receive()
-                self.socket.send_ack()
-                if op_code == OperationCodes.END:
-                    print("Ending connection")
-                    break
+                self.socket.send_ack() # add to socket receive function
                 f.write(data)
                 bytes_received += len(data)
             return bytes_received

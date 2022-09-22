@@ -13,8 +13,8 @@ class ServerDownloadHandler(ServerHandler):
 
     def run(self):
         self.handle_process_start()
-        bytes_sent = self.file_sender.send_file(self.file_name)
-        self.socket.close_connection(bytes_sent, self.file_size)
+        self.file_sender.send_file(self.file_name, self.file_size)
+        self.socket.close_connection()
 
     def handle_process_start(self):
         op_code, data = self.socket.receive()
