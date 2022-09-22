@@ -14,20 +14,18 @@ from lib.custom_socket.saw_socket import SaWSocket
 HOST = "localhost"
 PORT = 5000
 BUFF_SIZE = 1024
-PROTOCOL_TYPE = "SaW"
-if PROTOCOL_TYPE == "SaW":
-    packet_type = SaWPacket
-    socket_type = SaWSocket
+PROTOCOL = "SaW"
+if PROTOCOL == "SaW":
+    Socket = SaWSocket
 else:
-    packet_type = GBNPacket
-    socket_type = GBNSocket
+    Socket = GBNSocket
 
 
-accepter = Accepter(HOST, PORT, packet_type, socket_type)
+accepter = Accepter(HOST, PORT, Socket)
 
 while True:
-    op_code, client, address = accepter.listen(BUFF_SIZE)
+    op_code, client_socket, client_address = accepter.accept()
     if op_code == OperationCodes.DOWNLOAD:
-        ServerDownloadHandler(client, address).start()
+        ServerDownloadHandler(client_socket, client_address).start()
     else:
-        ServerUploadHandler(client, address).start()
+        ServerUploadHandler(client_socket, client_address).start()

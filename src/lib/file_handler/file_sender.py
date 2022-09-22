@@ -2,9 +2,6 @@ from lib.protocol_handler import OperationCodes
 from .file_handler import FileHandler
 import os
 
-SRC_FOLDER = "../files/downloaded"
-
-
 class FileSender(FileHandler):
     def __init__(self, socket, client_address, source_folder):
         self.source_folder = source_folder
