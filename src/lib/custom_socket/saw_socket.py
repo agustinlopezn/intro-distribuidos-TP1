@@ -4,8 +4,8 @@ from lib.protocol_handler import OperationCodes
 
 
 class SaWSocket(CustomSocket):
-    def __init__(self, opposite_address, timeout):
-        super().__init__(opposite_address, packet_type=SaWPacket, timeout=timeout)
+    def __init__(self, **kwargs):
+        super().__init__(packet_type=SaWPacket, **kwargs)
 
     def _send(self, packet):
         b_s = self.socket.sendto(packet, self.opposite_address)
@@ -51,6 +51,13 @@ class SaWSocket(CustomSocket):
         data, address = self.socket.recvfrom(1024)
         op_code, seq_number, ack_number, data = self.packet_type.parse_packet(data)
         return op_code, data
+
+    def receive_first_connection(self):
+        msg, client_address = self.socket.recvfrom(1024)
+        op_code = self.packet_type.get_op_code(msg)
+        if op_code not in (OperationCodes.DOWNLOAD, OperationCodes.UPLOAD):
+            raise Exception("Invalid operation code")
+        return op_code, client_address
 
     def serialize_file_information(self, file_name, file_size):
         if not file_size:

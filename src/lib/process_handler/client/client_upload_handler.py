@@ -9,7 +9,7 @@ SRC_FOLDER = "../files/source"
 
 class ClientUploadHandler(ClientHandler):
     def __init__(self, opposite_address):
-        socket = SaWSocket(("localhost", PORT), timeout=3)
+        socket = SaWSocket(opposite_address=("localhost", PORT), timeout=3)
         self.file_sender = FileSender(socket, opposite_address, SRC_FOLDER)
         super().__init__(socket, opposite_address)
 

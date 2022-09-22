@@ -1,4 +1,5 @@
 import socket
+from lib.custom_socket.saw_socket import SaWSocket
 from lib.protocol_handler import OperationCodes
 
 
@@ -8,16 +9,11 @@ class Accepter:
         self.port = port
         self.packet_type = packet_type
         self.socket_type = socket_type
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.bind((self.host, self.port))
+        self.socket = SaWSocket(opposite_address=None, host=host, port=port)
 
     def listen(self, buff_size):
-        msg, client_address = self.socket.recvfrom(buff_size)
-        op_code = self.packet_type.get_op_code(msg)
-        if op_code not in (OperationCodes.DOWNLOAD, OperationCodes.UPLOAD):
-            raise Exception("Invalid operation code")
-        client = self.socket_type(client_address, timeout=2)
-        self.socket.sendto(
-            self.packet_type.create_server_information(client.port), client_address
-        )
-        return op_code, client, client_address
+        op_code, client_address = self.socket.receive_first_connection()
+        self.socket.set_opposite_address(client_address)
+        new_socket = self.socket_type(opposite_address=client_address, timeout=2)
+        self.socket.send_sv_information(new_socket.port)
+        return op_code, new_socket, client_address
