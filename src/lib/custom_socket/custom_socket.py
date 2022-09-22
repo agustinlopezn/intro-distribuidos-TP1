@@ -12,6 +12,9 @@ class CustomSocket:
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.socket.bind((host, port))
         # Bind to a random port if no port and host are specified
+        self.set_timeout(timeout)
+
+    def set_timeout(self, timeout):
         self.socket.settimeout(timeout)
 
     def send_data(self, message):

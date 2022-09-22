@@ -11,7 +11,7 @@ DEST_FOLDER = "../files/downloaded/"
 
 class ClientDownloadHandler(ClientHandler):
     def __init__(self, opposite_address):
-        socket = SaWSocket(opposite_address=("localhost", PORT), timeout=3)
+        socket = SaWSocket(opposite_address=opposite_address, timeout=3)
         self.file_receiver = FileReceiver(socket, opposite_address, DEST_FOLDER)
         super().__init__(socket, opposite_address)
 

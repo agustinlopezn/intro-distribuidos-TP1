@@ -10,6 +10,7 @@ class Accepter:
         self.packet_type = packet_type
         self.socket_type = socket_type
         self.socket = SaWSocket(opposite_address=None, host=host, port=port)
+        self.socket.set_timeout(None)
 
     def listen(self, buff_size):
         op_code, client_address = self.socket.receive_first_connection()
