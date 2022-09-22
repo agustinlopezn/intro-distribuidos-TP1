@@ -27,5 +27,5 @@ while True:
     op_code, client_socket, client_address = accepter.accept()
     if op_code == OperationCodes.DOWNLOAD:
         ServerDownloadHandler(client_socket, client_address).start()
-    else:
+    elif op_code == OperationCodes.UPLOAD:
         ServerUploadHandler(client_socket, client_address).start()

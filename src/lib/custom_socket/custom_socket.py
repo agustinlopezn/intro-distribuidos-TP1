@@ -21,6 +21,9 @@ class CustomSocket:
 
     def receive(self):
         raise NotImplementedError
+    
+    def send_dl_request(self):
+        raise NotImplementedError
 
     @property
     def port(self):
