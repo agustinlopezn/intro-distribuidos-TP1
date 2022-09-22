@@ -3,9 +3,12 @@ from lib.protocol_handler import OperationCodes
 
 
 class SaWPacket(Packet):
-    @staticmethod
-    def generate_packet(op_code, seq_number, ack_number, data):
-        bytes = bytearray(3 + len(data))
+    CHUNK_SIZE = 1024
+    HEADER_SIZE = 3
+
+    @classmethod
+    def generate_packet(cls, op_code, seq_number, ack_number, data):
+        bytes = bytearray(cls.HEADER_SIZE + len(data))
         bytes[0] = op_code
         bytes[1] = seq_number
         bytes[2] = ack_number
@@ -32,3 +35,13 @@ class SaWPacket(Packet):
             return int(SaWPacket.parse_packet(data)[0])
         except ValueError:
             return -1
+
+    # Needs to contemplate header size, because it is not included in the data
+    @classmethod
+    def get_sending_chunk_size(cls):
+        return cls.CHUNK_SIZE
+
+    # Does not contemplate header size, it is for receiving purposes only
+    @classmethod
+    def get_receiving_chunk_size(cls):
+        return cls.CHUNK_SIZE + cls.HEADER_SIZE

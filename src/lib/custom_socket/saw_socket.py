@@ -48,12 +48,12 @@ class SaWSocket(CustomSocket):
         return self._send_and_wait(op_code, data)
 
     def receive(self):
-        data, address = self.socket.recvfrom(1024)
+        data, address = self.socket.recvfrom(SaWPacket.get_receiving_chunk_size())
         op_code, seq_number, ack_number, data = SaWPacket.parse_packet(data)
         return op_code, data
 
     def receive_first_connection(self):
-        msg, client_address = self.socket.recvfrom(1024)
+        msg, client_address = self.socket.recvfrom(SaWPacket.get_receiving_chunk_size())
         op_code = SaWPacket.get_op_code(msg)
         if op_code not in (OperationCodes.DOWNLOAD, OperationCodes.UPLOAD):
             raise Exception("Invalid operation code")
@@ -94,5 +94,8 @@ class SaWSocket(CustomSocket):
         raise Exception("Connection timed out")
 
     def close_connection(self):
-            self.socket.close()
-            print("Connection closed successfully")
+        self.socket.close()
+        print("Connection closed successfully")
+
+    def get_sending_chunk_size(self):
+        return SaWPacket.get_sending_chunk_size()

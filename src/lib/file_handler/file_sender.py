@@ -12,7 +12,7 @@ class FileSender(FileHandler):
         with open(f"{self.source_folder}/{file_name}", "rb") as file:
             bytes_sent = 0
             while bytes_sent < file_size:
-                data = file.read(512)
+                data = file.read(self.socket.get_sending_chunk_size())
                 try:
                     self.socket.send_data(data)
                     bytes_sent += len(data)
