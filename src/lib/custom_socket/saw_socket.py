@@ -70,7 +70,6 @@ class SaWSocket(CustomSocket):
         while True:
             data, address = self.socket.recvfrom(SaWPacket.get_receiving_chunk_size())
             op_code, seq_number, data = SaWPacket.parse_packet(data)
-            # import pdb; pdb.set_trace()
             if self.valid_seq_number(seq_number):
                 self.send_ack()
                 self.seq_number = int(not self.seq_number)
