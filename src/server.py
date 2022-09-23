@@ -24,8 +24,8 @@ else:
 accepter = Accepter(HOST, PORT, Socket)
 
 while True:
-    op_code, client_socket, client_address = accepter.accept()
+    op_code, client_socket, client_address, file_data = accepter.accept()
     if op_code == OperationCodes.DOWNLOAD:
-        ServerDownloadHandler(client_socket, client_address).start()
+        ServerDownloadHandler(client_socket, client_address, file_data).start()
     elif op_code == OperationCodes.UPLOAD:
-        ServerUploadHandler(client_socket, client_address).start()
+        ServerUploadHandler(client_socket, client_address, file_data).start()

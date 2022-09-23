@@ -26,8 +26,12 @@ class SaWPacket(Packet):
     @staticmethod
     def create_server_information(port):
         return SaWPacket.generate_packet(
-            OperationCodes.SV_INFORMATION, 0, 0, str(port).encode()
+            OperationCodes.SV_INTRODUCTION, 0, 0, str(port).encode()
         )
+
+    @staticmethod
+    def get_packet_data(packet):
+        return packet[3:]
 
     @staticmethod
     def get_op_code(data):

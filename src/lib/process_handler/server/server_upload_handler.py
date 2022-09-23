@@ -9,8 +9,10 @@ class ServerUploadHandler(ServerHandler):
     def run(self):
         pass
 
-    def __init__(self, socket, client_address):
+    def __init__(self, socket, client_address, file_data):
         self.file_receiver = FileReceiver(socket, client_address, DEST_FOLDER)
+        self.file_name = file_data.split("#")[0]
+        self.file_size = int(file_data.split("#")[1])
         super().__init__(socket, client_address)
 
     def run(self):
@@ -19,13 +21,10 @@ class ServerUploadHandler(ServerHandler):
         self.socket.close_connection()
 
     def handle_process_start(self):
-        op_code, data = self.socket.receive()
-        if op_code != OperationCodes.FILE_INFORMATION:
-            raise Exception
+        # op_code, data = self.socket.receive()
+        # if op_code != OperationCodes.UPLOAD:
+        # raise Exception
 
-        file_name, size = data.decode().split("#")
+        self.socket.send_sv_information()
         # Check size limits before sending ACK
-        self.file_name = file_name
-        self.socket.send_ack()
-        self.file_size = int(size)
 

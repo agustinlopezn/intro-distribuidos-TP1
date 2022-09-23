@@ -1,6 +1,7 @@
 from lib.custom_socket.saw_socket import SaWSocket
 from lib.file_handler.file_sender import FileSender
 from lib.process_handler.client.client_handler import ClientHandler
+from lib.protocol_handler import OperationCodes
 
 PORT = 5000
 BUFF_SIZE = 1024
@@ -20,10 +21,13 @@ class ClientUploadHandler(ClientHandler):
 
     def handle_process_start(self, file_name):
         port = PORT
-        self.socket.send_up_request()
+        self.file_size = self.file_sender.get_file_size(file_name)
+        self.socket.send_up_request(file_name=file_name, file_size=self.file_size)
+
         op_code, data = self.socket.receive()
+        if op_code != OperationCodes.SV_INTRODUCTION:
+            raise Exception
+        
         port = int(data.decode())
         self.socket.destination_address = ("localhost", port)
-
-        self.file_size = self.file_sender.get_file_size(file_name)
-        self.socket.send_file_information(file_name=file_name, file_size=self.file_size)
+        self.socket.send_ack()

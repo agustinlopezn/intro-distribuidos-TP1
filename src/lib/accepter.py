@@ -10,9 +10,8 @@ class Accepter:
         self.socket.set_timeout(None)
 
     def accept(self):
-        op_code, client_address = self.socket.receive_first_connection()
+        op_code, client_address, file_data = self.socket.receive_first_connection()
         self.socket.set_destination_address(client_address)
 
         new_socket = self.Socket(destination_address=client_address, timeout=2)
-        self.socket.send_sv_information(new_socket.port)
-        return op_code, new_socket, client_address
+        return op_code, new_socket, client_address, file_data

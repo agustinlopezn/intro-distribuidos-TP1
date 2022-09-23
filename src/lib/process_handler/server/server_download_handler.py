@@ -7,8 +7,9 @@ SRC_FOLDER = "../files/uploaded/"
 
 
 class ServerDownloadHandler(ServerHandler):
-    def __init__(self, socket, client_address):
+    def __init__(self, socket, client_address, file_data):
         self.file_sender = FileSender(socket, client_address, SRC_FOLDER)
+        self.file_name = file_data
         super().__init__(socket, client_address)
 
     def run(self):
@@ -17,11 +18,9 @@ class ServerDownloadHandler(ServerHandler):
         self.socket.close_connection()
 
     def handle_process_start(self):
-        op_code, data = self.socket.receive()
-        if op_code != OperationCodes.FILE_INFORMATION:
-            raise Exception
+        self.file_size = self.file_sender.get_file_size(self.file_name)
+        self.socket.send_sv_information(self.file_size)
 
-        self.file_name = data.decode()
         file_size = self.file_sender.get_file_size(self.file_name)
         self.socket.send_file_information(file_size=file_size)
         self.file_size = file_size

@@ -3,7 +3,7 @@ class OperationCodes:
 
     DOWNLOAD = 0
     UPLOAD = 1
-    SV_INFORMATION = 2
+    SV_INTRODUCTION = 2
     FILE_INFORMATION = 3
     DATA = 4
     ACK = 5

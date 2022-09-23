@@ -11,10 +11,14 @@ class SaWSocket(CustomSocket):
         b_s = self.socket.sendto(packet, self.destination_address)
         return b_s
 
-    def send_dl_request(self):
-        op_code = OperationCodes.DOWNLOAD
-        expected_response_code = OperationCodes.SV_INFORMATION
-        return self._send_and_wait(op_code, "".encode(), expected_response_code)
+    def send_dl_request(self, file_name):
+        packet = SaWPacket.generate_packet(
+            op_code=OperationCodes.DOWNLOAD,
+            seq_number=0,
+            ack_number=0,
+            data=file_name.encode(),
+        )
+        return self._send(packet)
 
     def send_up_request(self):
         packet = SaWPacket.generate_packet(
@@ -28,14 +32,23 @@ class SaWSocket(CustomSocket):
         )
         self._send(packet)
 
-    def send_sv_information(self, port):
+    def serialize_information(self, port, file_size):
+        if not file_size:
+            return str(port).encode()
+        if not port:
+            return str(file_size).encode()
+        return f"{port}#{file_size}".encode()
+
+    def send_up_request(self, file_name, file_size=None):
+        data = self.serialize_information(file_name, file_size)
         packet = SaWPacket.generate_packet(
-            op_code=OperationCodes.SV_INFORMATION,
-            seq_number=0,
-            ack_number=0,
-            data=str(port).encode(),
+            op_code=OperationCodes.UPLOAD, seq_number=0, ack_number=0, data=data
         )
         self._send(packet)
+
+    def send_sv_information(self, file_size=None):
+        data = self.serialize_information(self.port, file_size)
+        self._send_and_wait(OperationCodes.SV_INTRODUCTION, data)
 
     def send_ack(self):
         packet = SaWPacket.generate_packet(
@@ -57,17 +70,10 @@ class SaWSocket(CustomSocket):
         op_code = SaWPacket.get_op_code(msg)
         if op_code not in (OperationCodes.DOWNLOAD, OperationCodes.UPLOAD):
             raise Exception("Invalid operation code")
-        return op_code, client_address
-
-    def serialize_file_information(self, file_name, file_size):
-        if not file_size:
-            return file_name.encode()
-        if not file_name:
-            return str(file_size).encode()
-        return f"{file_name}#{file_size}".encode()
+        return op_code, client_address, SaWPacket.get_packet_data(msg).decode()
 
     def send_file_information(self, file_name=None, file_size=None):
-        file_information = self.serialize_file_information(file_name, file_size)
+        file_information = self.serialize_information(file_name, file_size)
         op_code = OperationCodes.FILE_INFORMATION
         expected_response_code = (
             OperationCodes.ACK
