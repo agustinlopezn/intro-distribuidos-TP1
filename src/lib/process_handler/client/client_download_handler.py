@@ -5,7 +5,6 @@ from lib.protocol_handler import OperationCodes
 
 PORT = 5000
 BUFF_SIZE = 1024
-FILE_NAME = "test.pdf"
 DEST_FOLDER = "../files/downloaded/"
 
 

@@ -9,6 +9,7 @@ class FileSender(FileHandler):
         super().__init__(socket, client_address)
 
     def send_file(self, file_name, file_size):
+        print(f"Sending {file_name}")
         with open(f"{self.source_folder}/{file_name}", "rb") as file:
             bytes_sent = 0
             while bytes_sent < file_size:
