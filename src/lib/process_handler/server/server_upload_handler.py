@@ -21,10 +21,6 @@ class ServerUploadHandler(ServerHandler):
         self.socket.close_connection()
 
     def handle_process_start(self):
-        # op_code, data = self.socket.receive()
-        # if op_code != OperationCodes.UPLOAD:
-        # raise Exception
-
         self.socket.send_sv_information()
         # Check size limits before sending ACK
 

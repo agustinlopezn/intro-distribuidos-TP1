@@ -24,10 +24,8 @@ class ClientUploadHandler(ClientHandler):
         self.file_size = self.file_sender.get_file_size(file_name)
         self.socket.send_up_request(file_name=file_name, file_size=self.file_size)
 
-        op_code, data = self.socket.receive()
-        if op_code != OperationCodes.SV_INTRODUCTION:
-            raise Exception
+        data = self.socket.receive_sv_information()
         
         port = int(data.decode())
         self.socket.destination_address = ("localhost", port)
-        self.socket.send_ack()
+        self.socket.send_nsq_ack()

@@ -20,7 +20,3 @@ class ServerDownloadHandler(ServerHandler):
     def handle_process_start(self):
         self.file_size = self.file_sender.get_file_size(self.file_name)
         self.socket.send_sv_information(self.file_size)
-
-        file_size = self.file_sender.get_file_size(self.file_name)
-        self.socket.send_file_information(file_size=file_size)
-        self.file_size = file_size

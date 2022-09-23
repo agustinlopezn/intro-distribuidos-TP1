@@ -23,13 +23,11 @@ class ClientDownloadHandler(ClientHandler):
     def handle_process_start(self, file_name):
         port = PORT
         self.socket.send_dl_request(file_name)
-        op_code, data = self.socket.receive()
-        if op_code != OperationCodes.SV_INTRODUCTION:
-            raise Exception
+        data = self.socket.receive_sv_information()
             
         port, file_size = data.decode().split("#")
         port, self.file_size = int(port), int(file_size)
         self.socket.destination_address = ("localhost", port)
         # Check size limits before sending ACK
-        self.socket.send_ack()
+        self.socket.send_nsq_ack()
 

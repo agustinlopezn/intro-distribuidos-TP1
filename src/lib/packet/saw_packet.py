@@ -4,24 +4,23 @@ from lib.protocol_handler import OperationCodes
 
 class SaWPacket(Packet):
     CHUNK_SIZE = 1024
-    HEADER_SIZE = 3
+    HEADER_SIZE = 2
 
     @classmethod
-    def generate_packet(cls, op_code, seq_number, ack_number, data):
+    def generate_packet(cls, op_code, seq_number, data):
         bytes = bytearray(cls.HEADER_SIZE + len(data))
         bytes[0] = op_code
-        bytes[1] = seq_number
-        bytes[2] = ack_number
-        bytes[3:] = data
+        bytes[1] = seq_number # need a more generic name
+        # bytes[2] = ack_number
+        bytes[2:] = data
         return bytes
 
     @staticmethod
     def parse_packet(packet):
         op_code = packet[0]
         seq_number = packet[1]
-        ack_number = packet[2]
-        data = packet[3:]
-        return op_code, seq_number, ack_number, data
+        data = packet[2:]
+        return op_code, seq_number, data
 
     @staticmethod
     def create_server_information(port):
@@ -31,7 +30,7 @@ class SaWPacket(Packet):
 
     @staticmethod
     def get_packet_data(packet):
-        return packet[3:]
+        return packet[2:]
 
     @staticmethod
     def get_op_code(data):

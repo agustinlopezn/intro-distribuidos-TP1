@@ -10,8 +10,7 @@ class FileReceiver(FileHandler):
         with open(f"{self.destination_folder}/{file_name}", "wb") as f:
             bytes_received = 0
             while bytes_received < file_size:
-                op_code, data = self.socket.receive()
-                self.socket.send_ack() # add to socket receive function
+                data = self.socket.receive_data()
                 f.write(data)
                 bytes_received += len(data)
             return bytes_received

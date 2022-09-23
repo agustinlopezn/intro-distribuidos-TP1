@@ -9,6 +9,7 @@ class OperationCodes:
     ACK = 5
     ERROR = 6
     END = 7
+    NSQ_ACK = 8
 
 
 SAW_CHUNK_SIZE = 512
