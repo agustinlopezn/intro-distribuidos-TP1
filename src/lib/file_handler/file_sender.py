@@ -8,7 +8,7 @@ class FileSender(FileHandler):
         self.source_folder = source_folder
         super().__init__(socket, client_address)
 
-    def send_file(self, file_name, file_size):
+    def send_file(self, file_name, file_size, showProgress=False):
         print(f"Sending {file_name}")
         with open(f"{self.source_folder}/{file_name}", "rb") as file:
             bytes_sent = 0
@@ -17,9 +17,12 @@ class FileSender(FileHandler):
                 try:
                     self.socket.send_data(data)
                     bytes_sent += len(data)
+                    if showProgress:
+                        print(f"Progress: {bytes_sent/file_size * 100:.0f}%", end='\r')
                 except Exception as e:
                     print(e)
                     break
+            print("")
             return bytes_sent
 
     def get_file_size(self, file_name):

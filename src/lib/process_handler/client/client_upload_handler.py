@@ -16,7 +16,7 @@ class ClientUploadHandler(ClientHandler):
 
     def handle_upload(self, file_name):
         self.handle_process_start(file_name)
-        self.file_sender.send_file(file_name, self.file_size)
+        self.file_sender.send_file(file_name, self.file_size, showProgress=True)
         self.socket.close_connection()
 
     def handle_process_start(self, file_name):

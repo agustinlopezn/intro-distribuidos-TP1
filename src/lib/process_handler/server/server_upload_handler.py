@@ -17,7 +17,7 @@ class ServerUploadHandler(ServerHandler):
 
     def run(self):
         self.handle_process_start()
-        self.file_receiver.receive_file(self.file_name, self.file_size)
+        self.file_receiver.receive_file(self.file_name, self.file_size, showProgress=False)
         self.socket.close_connection()
 
     def handle_process_start(self):

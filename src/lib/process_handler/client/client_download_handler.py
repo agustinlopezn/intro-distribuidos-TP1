@@ -16,7 +16,7 @@ class ClientDownloadHandler(ClientHandler):
 
     def handle_download(self, file_name):
         self.handle_process_start(file_name)
-        self.file_receiver.receive_file(file_name, self.file_size)
+        self.file_receiver.receive_file(file_name, self.file_size, showProgress=True)
         self.socket.close_connection()
 
     def handle_process_start(self, file_name):
