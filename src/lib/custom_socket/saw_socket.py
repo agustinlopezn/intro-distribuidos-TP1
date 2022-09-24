@@ -1,3 +1,4 @@
+import textwrap
 from lib.packet.saw_packet import SaWPacket
 from .custom_socket import CustomSocket, timeout
 from lib.protocol_handler import OperationCodes
@@ -51,13 +52,17 @@ class SaWSocket(CustomSocket):
 
     def send_data(self, data):
         op_code = OperationCodes.DATA
-        return self._send_and_wait(op_code, data)
+        max_packet_size = SaWPacket.MAX_PAYLOAD_SIZE
+
+        for head in range (0, len(data), max_packet_size):
+            payload = data[head:head+max_packet_size]
+            self._send_and_wait(op_code, payload)
 
     def valid_seq_number(self, received_seq_number):
         return received_seq_number == self.seq_number
 
     def receive_ack(self):
-        data, _address = self.socket.recvfrom(SaWPacket.get_receiving_chunk_size())
+        data, _address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
         op_code, seq_number, data = SaWPacket.parse_packet(data)
         if op_code == OperationCodes.NSQ_ACK:
             return data
@@ -68,7 +73,7 @@ class SaWSocket(CustomSocket):
 
     def receive_data(self):
         while True:
-            data, address = self.socket.recvfrom(SaWPacket.get_receiving_chunk_size())
+            data, address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
             op_code, seq_number, data = SaWPacket.parse_packet(data)
             if self.valid_seq_number(seq_number):
                 self.send_ack()
@@ -77,13 +82,13 @@ class SaWSocket(CustomSocket):
     
     def receive_sv_information(self):
         while True:
-            data, address = self.socket.recvfrom(SaWPacket.get_receiving_chunk_size())
+            data, address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
             op_code, seq_number, data = SaWPacket.parse_packet(data)
             if op_code == OperationCodes.SV_INTRODUCTION:
                 return data
 
     def receive_first_connection(self):
-        msg, client_address = self.socket.recvfrom(SaWPacket.get_receiving_chunk_size())
+        msg, client_address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
         op_code = SaWPacket.get_op_code(msg)
         if op_code not in (OperationCodes.DOWNLOAD, OperationCodes.UPLOAD):
             raise Exception("Invalid operation code")
@@ -105,6 +110,3 @@ class SaWSocket(CustomSocket):
     def close_connection(self):
         self.socket.close()
         print("Connection closed successfully")
-
-    def get_sending_chunk_size(self):
-        return SaWPacket.get_sending_chunk_size()

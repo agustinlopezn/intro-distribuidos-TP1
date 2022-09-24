@@ -10,8 +10,3 @@ class OperationCodes:
     ERROR = 6
     END = 7
     NSQ_ACK = 8
-
-
-SAW_CHUNK_SIZE = 512
-GBN_CHUNK_SIZE = 512
-

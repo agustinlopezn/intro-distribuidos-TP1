@@ -1,7 +1,8 @@
 import threading
 
-
 class FileHandler():
+    CHUNK_SIZE = 65536
+    
     def __init__(self, socket, client_address):
         super().__init__()
         self.socket = socket
