@@ -1,4 +1,3 @@
-import textwrap
 from lib.packet.saw_packet import SaWPacket
 from .custom_socket import CustomSocket, timeout
 from lib.protocol_handler import OperationCodes
@@ -9,8 +8,10 @@ class SaWSocket(CustomSocket):
         self.seq_number = 0
         super().__init__(**kwargs)
 
-    def _send(self, packet):
-        b_s = self.socket.sendto(packet, self.destination_address)
+    def _send(self, packet, duplicate=False):
+        print(f"Sending packet with op_code {packet[0]} and seq_number {packet[1]}")
+        b_s = self.socket.sendto(packet, self.opposite_address)
+        if duplicate: self.socket.sendto(packet, self.opposite_address)
         return b_s
 
     def generate_packet(self, op_code, data):
@@ -56,18 +57,20 @@ class SaWSocket(CustomSocket):
 
         for head in range (0, len(data), max_packet_size):
             payload = data[head:head+max_packet_size]
-            self._send_and_wait(op_code, payload)
+            self._send_and_wait(op_code, payload, duplicate=True)
 
     def valid_seq_number(self, received_seq_number):
         return received_seq_number == self.seq_number
 
     def receive_ack(self):
-        data, _address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
+        data, address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
         op_code, seq_number, data = SaWPacket.parse_packet(data)
-        if op_code == OperationCodes.NSQ_ACK:
+        ack_type = "ACK" if op_code == OperationCodes.ACK else "NSQ_ACK"
+        print(f"[{ack_type}] Received packet with seq_number {seq_number} and op_code {op_code}")
+        if op_code == OperationCodes.NSQ_ACK and self.valid_opposite_address(address):
             return data
-        if op_code == OperationCodes.ACK and self.valid_seq_number(seq_number):
-            self.seq_number = int(not self.seq_number)
+        if op_code == OperationCodes.ACK:
+            self.seq_number += 1 #int(not self.seq_number)
             return data
         raise timeout
 
@@ -75,9 +78,10 @@ class SaWSocket(CustomSocket):
         while True:
             data, address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
             op_code, seq_number, data = SaWPacket.parse_packet(data)
-            if self.valid_seq_number(seq_number):
+            print(f"[DATA] Received packet with seq_number {seq_number} and op_code {op_code}")
+            if self.valid_packet(address, seq_number):
                 self.send_ack()
-                self.seq_number = int(not self.seq_number)
+                self.seq_number += 1 #int(not self.seq_number)
                 return data
     
     def receive_sv_information(self):
@@ -85,6 +89,7 @@ class SaWSocket(CustomSocket):
             data, address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
             op_code, seq_number, data = SaWPacket.parse_packet(data)
             if op_code == OperationCodes.SV_INTRODUCTION:
+                self.opposite_address = address
                 return data
 
     def receive_first_connection(self):
@@ -94,12 +99,22 @@ class SaWSocket(CustomSocket):
             raise Exception("Invalid operation code")
         return op_code, client_address, SaWPacket.get_packet_data(msg).decode()
 
-    def _send_and_wait(self, op_code, data, expected_response_code=OperationCodes.ACK):
+    def valid_opposite_address(self, address):
+        # import pdb; pdb.set_trace()
+        return address == self.opposite_address
+    
+    def valid_packet(self, address, seq_number):
+        return self.valid_opposite_address(address) and self.valid_seq_number(seq_number)
+
+        
+        
+
+    def _send_and_wait(self, op_code, data, duplicate=False):
         attemps = 3
         packet = self.generate_packet(op_code, data)
         while attemps > 0:
             try:
-                self._send(packet)
+                self._send(packet, duplicate=duplicate)
                 data = self.receive_ack()
                 return data
             except timeout:

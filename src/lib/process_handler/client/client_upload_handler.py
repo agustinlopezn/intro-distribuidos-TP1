@@ -9,10 +9,10 @@ SRC_FOLDER = "../files/source"
 
 
 class ClientUploadHandler(ClientHandler):
-    def __init__(self, destination_address):
-        socket = SaWSocket(destination_address=("localhost", PORT), timeout=3)
-        self.file_sender = FileSender(socket, destination_address, SRC_FOLDER)
-        super().__init__(socket, destination_address)
+    def __init__(self, opposite_address):
+        socket = SaWSocket(opposite_address=("localhost", PORT), timeout=3)
+        self.file_sender = FileSender(socket, opposite_address, SRC_FOLDER)
+        super().__init__(socket, opposite_address)
 
     def handle_upload(self, file_name):
         self.handle_process_start(file_name)
@@ -26,6 +26,4 @@ class ClientUploadHandler(ClientHandler):
 
         data = self.socket.receive_sv_information()
         
-        port = int(data.decode())
-        self.socket.destination_address = ("localhost", port)
         self.socket.send_nsq_ack()

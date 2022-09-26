@@ -9,10 +9,10 @@ DEST_FOLDER = "../files/downloaded/"
 
 
 class ClientDownloadHandler(ClientHandler):
-    def __init__(self, destination_address):
-        socket = SaWSocket(destination_address=destination_address, timeout=3)
-        self.file_receiver = FileReceiver(socket, destination_address, DEST_FOLDER)
-        super().__init__(socket, destination_address)
+    def __init__(self, opposite_address):
+        socket = SaWSocket(opposite_address=opposite_address, timeout=3)
+        self.file_receiver = FileReceiver(socket, opposite_address, DEST_FOLDER)
+        super().__init__(socket, opposite_address)
 
     def handle_download(self, file_name):
         self.handle_process_start(file_name)
@@ -26,7 +26,7 @@ class ClientDownloadHandler(ClientHandler):
             
         port, file_size = data.decode().split("#")
         port, self.file_size = int(port), int(file_size)
-        self.socket.destination_address = ("localhost", port)
+        self.socket.opposite_address = ("localhost", port)
         # Check size limits before sending ACK
         self.socket.send_nsq_ack()
 

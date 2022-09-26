@@ -5,9 +5,9 @@ class CustomSocket:
     __abstract__ = True
 
     def __init__(
-        self, destination_address=None, timeout=5, host="", port=0
+        self, opposite_address=None, timeout=5, host="", port=0
     ):
-        self.destination_address = destination_address
+        self.opposite_address = opposite_address
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.socket.bind((host, port))
         # Bind to a random port if no port and host are specified
@@ -28,6 +28,3 @@ class CustomSocket:
     @property
     def port(self):
         return self.socket.getsockname()[1]
-
-    def set_destination_address(self, destination_address):
-        self.destination_address = destination_address
