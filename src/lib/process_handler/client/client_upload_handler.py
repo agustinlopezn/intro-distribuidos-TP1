@@ -23,7 +23,5 @@ class ClientUploadHandler(ClientHandler):
         port = PORT
         self.file_size = self.file_sender.get_file_size(file_name)
         self.socket.send_up_request(file_name=file_name, file_size=self.file_size)
-
-        data = self.socket.receive_sv_information()
-        
+        self.socket.receive_sv_information()
         self.socket.send_nsq_ack()
