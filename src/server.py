@@ -18,14 +18,14 @@ PORT = 5000
 BUFF_SIZE = 1024
 PROTOCOL = "SaW"
 if PROTOCOL == "SaW":
-    Socket = SaWSocket
+    custom_socket = SaWSocket
 else:
-    Socket = GBNSocket
+    custom_socket = GBNSocket
 THREADS = {}
 
 
 def start_server():
-    accepter = Accepter(HOST, PORT, Socket)
+    accepter = Accepter(HOST, PORT, custom_socket)
     thread_cleaner = ThreadCleaner(THREADS)
     thread_cleaner.start()
     while True:

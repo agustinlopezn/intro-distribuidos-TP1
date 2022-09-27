@@ -18,14 +18,13 @@ class FileReceiver(FileHandler):
 
     def receive_file(self, file_name, file_size, showProgress=False):
         file_name = self.get_valid_name(f"{self.destination_folder}/{file_name}")
-
         with open(file_name, "wb") as f:
             bytes_received = 0
             while bytes_received < file_size:
-                data = self.socket.receive_data()
-                f.write(data)
-                bytes_received += len(data)
-                if showProgress:
-                    print(f"Progress: {bytes_received/file_size * 100:.0f}%", end='\r')
+                data, correct_data = self.socket.receive_data()
+                if correct_data:
+                    f.write(data)
+                    bytes_received += len(data)
+                    print(f"Progress: {bytes_received/file_size * 100:.0f}%")
             print("")
             return bytes_received

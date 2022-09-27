@@ -1,6 +1,13 @@
+from random import random
 from lib.packet.saw_packet import SaWPacket
 from .custom_socket import CustomSocket, timeout
 from lib.protocol_handler import OperationCodes
+
+DROP_PROBABILITY = 0.1
+
+
+def drop_packet():
+    return random() < DROP_PROBABILITY
 
 
 class SaWSocket(CustomSocket):
@@ -8,13 +15,16 @@ class SaWSocket(CustomSocket):
         self.seq_number = 0
         super().__init__(**kwargs)
 
-    def _send(self, packet, duplicate=False):
+    def _send(self, packet):
         print(
             f"Sending packet with op_code {packet[0]} and seq_number {packet[1]} from port {self.port}"
         )
-        b_s = self.socket.sendto(packet, self.opposite_address)
+        if drop_packet():
+            print(
+                f"Dropping packet with op_code {packet[0]} and seq_number {packet[1]}"
+            )
+            return
         self.socket.sendto(packet, self.opposite_address)
-        return b_s
 
     def generate_packet(self, op_code, data):
         packet = SaWPacket.generate_packet(
@@ -55,18 +65,20 @@ class SaWSocket(CustomSocket):
         data = self.serialize_information(self.port, file_size)
         self._send_and_wait(OperationCodes.SV_INTRODUCTION, data)
 
-    def send_ack(self):
-        print("Trying to send ack")
-        packet = self.generate_packet(op_code=OperationCodes.ACK, data="".encode())
+    def send_ack(self, inverted_seq_number=False):
+        packet = SaWPacket.generate_packet(
+            op_code=OperationCodes.ACK, seq_number=self.seq_number, data="".encode()
+        )
         self._send(packet)
 
     def send_data(self, data):
         op_code = OperationCodes.DATA
         max_packet_size = SaWPacket.MAX_PAYLOAD_SIZE
-
+        print(f"Sending {len(data)} bytes")
         for head in range(0, len(data), max_packet_size):
             payload = data[head : head + max_packet_size]
-            self._send_and_wait(op_code, payload, duplicate=True)
+            self._send_and_wait(op_code, payload)
+            print(f"{len(payload)} bytes sent")
 
     def valid_seq_number(self, received_seq_number):
         return received_seq_number == self.seq_number
@@ -80,22 +92,31 @@ class SaWSocket(CustomSocket):
             ):
                 return data
             if op_code == OperationCodes.ACK and self.valid_packet(address, seq_number):
-                self.seq_number = int(not self.seq_number)
+                print("Received ack with seq_number", seq_number)
+                self.seq_number += 1
                 return data
 
     def receive_data(self):
         while True:
-            data, address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
-            op_code, seq_number, data = SaWPacket.parse_packet(data)
-            print(
-                f"[DATA] Received packet with seq_number {seq_number} and op_code {op_code}"
-            )
-            if op_code == OperationCodes.DATA and self.valid_packet(
-                address, seq_number
-            ):
-                self.send_ack()
-                self.seq_number = int(not self.seq_number)
-                return data
+            try:
+                data, address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
+                op_code, seq_number, data = SaWPacket.parse_packet(data)
+                print(
+                    f"[DATA] Received packet with seq_number {seq_number} and op_code {op_code}"
+                )
+                if op_code == OperationCodes.DATA:
+                    if self.valid_packet(address, seq_number):
+                        self.send_ack()
+                        self.seq_number += 1
+                        return data, True
+                    else:  # duplicate packet, should discard and send inverted ack
+                        print(f"Received duplicate packet with seq_number {seq_number}")
+                        self.seq_number -= 1
+                        self.send_ack(inverted_seq_number=True)
+                        self.seq_number += 1
+                        return data, False
+            except timeout:
+                pass # shouldn't throw an exception, should just keep iterating
 
     def receive_sv_information(self):
         while True:
@@ -123,12 +144,12 @@ class SaWSocket(CustomSocket):
             seq_number
         )
 
-    def _send_and_wait(self, op_code, data, duplicate=False):
+    def _send_and_wait(self, op_code, data):
         attemps = 3
         packet = self.generate_packet(op_code, data)
         while attemps > 0:
             try:
-                self._send(packet, duplicate=duplicate)
+                self._send(packet)
                 data = self.receive_ack()
                 return data
             except timeout:

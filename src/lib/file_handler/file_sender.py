@@ -15,12 +15,13 @@ class FileSender(FileHandler):
             while bytes_sent < file_size:
                 data = file.read(self.CHUNK_SIZE)
                 try:
+                    print("Sending data...")
                     self.socket.send_data(data)
                     bytes_sent += len(data)
-                    if showProgress:
-                        print(f"Progress: {bytes_sent/file_size * 100:.0f}%", end='\r')
+                    print(f"Progress: {bytes_sent/file_size * 100:.0f}%")
                 except Exception as e:
                     print(e)
+                    print(f"Progress: {bytes_sent/file_size * 100:.0f}%")
                     break
             print("")
             return bytes_sent
