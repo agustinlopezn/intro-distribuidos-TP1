@@ -1,7 +1,7 @@
-from lib.protocol_handler import OperationCodes
-from .file_handler import FileHandler
+import os
+from threading import Thread
+from lib.process_handler.file_handler import FileHandler
 
-import os.path
 
 class FileReceiver(FileHandler):
     def __init__(self, socket, client_address, destination_folder):

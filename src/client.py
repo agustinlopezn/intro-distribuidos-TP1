@@ -2,19 +2,21 @@ import sys
 from socket import *
 
 from lib.custom_socket.saw_socket import SaWSocket
-from lib.process_handler.client.client_download_handler import ClientDownloadHandler
-from lib.process_handler.client.client_upload_handler import ClientUploadHandler
+from lib.process_handler.file_sender.client_file_sender import ClientFileSender
+from lib.process_handler.file_receiver.client_file_receiver import ClientFileReceiver
 from lib.protocol_handler import OperationCodes
 
 PORT = 5000
 BUFF_SIZE = 1024
 
+
 def download(file_name):
-    ClientDownloadHandler(("localhost", PORT)).handle_download(file_name)
+    ClientFileReceiver(("localhost", PORT)).handle_receive_process(file_name)
 
 
 def upload(file_name):
-    ClientUploadHandler(("localhost", PORT)).handle_upload(file_name)
+    ClientFileSender(("localhost", PORT)).handle_send_process(file_name)
+
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:

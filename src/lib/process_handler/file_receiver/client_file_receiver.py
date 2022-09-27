@@ -1,6 +1,6 @@
+from threading import Thread
 from lib.custom_socket.saw_socket import SaWSocket
-from lib.file_handler.file_receiver import FileReceiver
-from lib.process_handler.client.client_handler import ClientHandler
+from lib.process_handler.file_receiver.file_receiver import FileReceiver
 from lib.protocol_handler import OperationCodes
 
 PORT = 5000
@@ -8,15 +8,14 @@ BUFF_SIZE = 1024
 DEST_FOLDER = "../files/downloaded/"
 
 
-class ClientDownloadHandler(ClientHandler):
+class ClientFileReceiver(FileReceiver):
     def __init__(self, opposite_address):
         socket = SaWSocket(opposite_address=opposite_address, timeout=3)
-        self.file_receiver = FileReceiver(socket, opposite_address, DEST_FOLDER)
-        super().__init__(socket, opposite_address)
+        super().__init__(socket, opposite_address, DEST_FOLDER)
 
-    def handle_download(self, file_name):
+    def handle_receive_process(self, file_name):
         self.handle_process_start(file_name)
-        self.file_receiver.receive_file(file_name, self.file_size, showProgress=True)
+        self.receive_file(file_name, self.file_size, showProgress=True)
         self.socket.close_connection()
 
     def handle_process_start(self, file_name):

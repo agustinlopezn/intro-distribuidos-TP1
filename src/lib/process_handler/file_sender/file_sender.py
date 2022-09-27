@@ -1,12 +1,15 @@
-from lib.protocol_handler import OperationCodes
-from .file_handler import FileHandler
 import os
+from threading import Thread
+
+from lib.process_handler.file_handler import FileHandler
 
 
 class FileSender(FileHandler):
-    def __init__(self, socket, client_address, source_folder):
-        self.source_folder = source_folder
-        super().__init__(socket, client_address)
+    __abstract__ = True
+
+    def __init__(self, socket, opposite_address, src_folder):
+        super().__init__(socket, opposite_address)
+        self.source_folder = src_folder
 
     def send_file(self, file_name, file_size, showProgress=False):
         print(f"Sending {file_name}")
@@ -28,4 +31,3 @@ class FileSender(FileHandler):
 
     def get_file_size(self, file_name):
         return os.stat(f"{self.source_folder}/{file_name}").st_size
-
