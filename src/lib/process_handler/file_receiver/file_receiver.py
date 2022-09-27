@@ -5,9 +5,9 @@ from lib.process_handler.file_handler import FileHandler
 
 
 class FileReceiver(FileHandler):
-    def __init__(self, opposite_address, destination_folder):
+    def __init__(self, opposite_address, destination_folder, host="", port=0):
         self.destination_folder = destination_folder
-        super().__init__(opposite_address)
+        super().__init__(opposite_address=opposite_address, host=host, port=port)
 
     def get_valid_name(self, file_name):
         counter = 1

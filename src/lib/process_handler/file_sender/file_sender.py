@@ -7,8 +7,8 @@ from lib.process_handler.file_handler import FileHandler
 class FileSender(FileHandler):
     __abstract__ = True
 
-    def __init__(self, opposite_address, src_folder):
-        super().__init__(opposite_address)
+    def __init__(self, opposite_address, src_folder, host="", port=0):
+        super().__init__(opposite_address=opposite_address, host=host, port=port)
         self.source_folder = src_folder
 
     def handle_send_process(self):

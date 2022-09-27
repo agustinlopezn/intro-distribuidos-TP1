@@ -1,5 +1,5 @@
 from socket import socket, AF_INET, SOCK_DGRAM, timeout
-
+from lib.logger import Logger
 
 class CustomSocket:
     __abstract__ = True
@@ -12,6 +12,7 @@ class CustomSocket:
         self.socket.bind((host, port))
         # Bind to a random port if no port and host are specified
         self.set_timeout(timeout)
+        self.logger = Logger(self.__class__.__name__)
 
     def set_timeout(self, timeout):
         self.socket.settimeout(timeout)
