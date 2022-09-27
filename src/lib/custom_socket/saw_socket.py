@@ -136,7 +136,6 @@ class SaWSocket(CustomSocket):
         return op_code, client_address, SaWPacket.get_packet_data(msg).decode()
 
     def valid_opposite_address(self, address):
-        # import pdb; pdb.set_trace()
         return address == self.opposite_address
 
     def valid_packet(self, address, seq_number):

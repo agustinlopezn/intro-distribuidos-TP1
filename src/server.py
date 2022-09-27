@@ -27,16 +27,18 @@ def start_server():
     thread_cleaner = ThreadCleaner(THREADS)
     thread_cleaner.start()
     while True:
-        op_code, client_socket, client_address, file_data = accepter.accept()
+        op_code, client_address, file_data = accepter.accept()
         if client_is_active(client_address):
             print(f"Client {client_address} is already connected")
             continue
         if op_code == OperationCodes.DOWNLOAD:
-            thread = ServerFileSender(client_socket, client_address, file_data)
+            file_sender = ServerFileSender(client_address, file_data)
+            file_sender.handle_send_process()
+            THREADS[client_address] = file_sender
         elif op_code == OperationCodes.UPLOAD:
-            thread = ServerFileReceiver(client_socket, client_address, file_data)
-        thread.start()
-        THREADS[client_address] = thread
+            file_receiver = ServerFileReceiver(client_address, file_data)
+            file_receiver.handle_receive_process()
+            THREADS[client_address] = file_receiver
 
 
 def client_is_active(client_address):

@@ -11,6 +11,4 @@ class Accepter:
 
     def accept(self):
         op_code, client_address, file_data = self.socket.receive_first_connection()
-        
-        new_socket = self.socket_type(opposite_address=client_address, timeout=3)
-        return op_code, new_socket, client_address, file_data
+        return op_code, client_address, file_data

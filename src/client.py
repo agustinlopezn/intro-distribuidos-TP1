@@ -11,11 +11,11 @@ BUFF_SIZE = 1024
 
 
 def download(file_name):
-    ClientFileReceiver(("localhost", PORT)).handle_receive_process(file_name)
+    ClientFileReceiver(file_name, ("localhost", PORT)).handle_receive_process()
 
 
 def upload(file_name):
-    ClientFileSender(("localhost", PORT)).handle_send_process(file_name)
+    ClientFileSender(file_name, ("localhost", PORT)).handle_send_process()
 
 
 if __name__ == "__main__":

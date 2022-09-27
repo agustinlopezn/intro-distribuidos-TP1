@@ -7,15 +7,19 @@ SRC_FOLDER = "../files/uploaded/"
 
 
 class ServerFileSender(FileSender, Thread):
-    def __init__(self, socket, opposite_address, file_data):
+    def __init__(self, opposite_address, file_data):
+        super().__init__(opposite_address, SRC_FOLDER)
         self.file_name = file_data
-        super().__init__(socket, opposite_address, SRC_FOLDER)
         Thread.__init__(self)
 
     def run(self):
         self.handle_process_start()
-        self.send_file(self.file_name, self.file_size)
+        self.send_file()
         self.socket.close_connection()
+
+    def handle_send_process(self):
+        # just for polymorphism purposes
+        self.start()
 
     def handle_process_start(self):
         self.file_size = self.get_file_size(self.file_name)
