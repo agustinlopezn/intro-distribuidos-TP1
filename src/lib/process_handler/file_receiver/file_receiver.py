@@ -25,10 +25,9 @@ class FileReceiver(FileHandler):
         with open(file_name, "wb") as f:
             bytes_received = 0
             while bytes_received < self.file_size:
-                data, correct_data = self.socket.receive_data()
-                if correct_data:
-                    f.write(data)
-                    bytes_received += len(data)
-                    print(f"Progress: {bytes_received/self.file_size * 100:.0f}%")
+                data = self.socket.receive_data()
+                f.write(data)
+                bytes_received += len(data)
+                print(f"Progress: {bytes_received/self.file_size * 100:.0f}%")
             print("")
             return bytes_received

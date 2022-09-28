@@ -2,6 +2,7 @@ from random import random
 from lib.packet.saw_packet import SaWPacket
 from .custom_socket import CustomSocket, timeout
 from lib.protocol_handler import OperationCodes
+import socket
 
 DROP_PROBABILITY = 0.0
 
@@ -16,12 +17,15 @@ class SaWSocket(CustomSocket):
         super().__init__(**kwargs)
 
     def _send(self, packet):
+        bytes_seq_number = packet[1:5]
+        seq_number = int.from_bytes(bytes_seq_number, byteorder='big', signed=False)
+        seq_number = socket.ntohl(seq_number)
         self.logger.debug(
-            f"Sending packet with op_code {packet[0]} and seq_number {packet[1]} from port {self.port}"
+            f"Sending packet with op_code {packet[0]} and seq_number {seq_number} from port {self.port}"
         )
         if drop_packet():
             self.logger.debug(
-                f"Dropping packet with op_code {packet[0]} and seq_number {packet[1]}"
+                f"Dropping packet with op_code {packet[0]} and seq_number {seq_number}"
             )
             return
         self.socket.sendto(packet, self.opposite_address)
@@ -72,9 +76,11 @@ class SaWSocket(CustomSocket):
                 "Server information not acknowledged. Starting process anyway"
             )
 
-    def send_ack(self):
+    def send_ack(self, invert_ack=False):
+        # ack_number = int(not self.seq_number) if invert_ack else self.seq_number
+        ack_number = self.seq_number - 1 if invert_ack else self.seq_number
         packet = SaWPacket.generate_packet(
-            op_code=OperationCodes.ACK, seq_number=self.seq_number, data="".encode()
+            op_code=OperationCodes.ACK, seq_number=ack_number, data="".encode()
         )
         self._send(packet)
 
@@ -104,34 +110,28 @@ class SaWSocket(CustomSocket):
                 return data
 
     def update_sequence_number(self):
-        self.seq_number = int(not self.seq_number)
-        # self.seq_number += 1 # this way is better for debugging
+        # self.seq_number = int(not self.seq_number)
+        self.seq_number += 1 # this way is better for debugging
 
     def receive_data(self):
         while True:
-            try:
-                data, address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
-                op_code, seq_number, data = SaWPacket.parse_packet(data)
-                self.logger.debug(
-                    f"[DATA] Received packet from port {address[1]} with seq_number {seq_number} and op_code {op_code}"
-                )
-                if op_code == OperationCodes.DATA:
-                    if self.valid_packet(address, seq_number):
-                        self.send_ack()
-                        correct_data = True  # received data is correct
-                    else:  # duplicate packet, should discard and send inverted ack
-                        self.logger.warning(
-                            f"Received duplicate packet with seq_number {seq_number}"
-                        )
-                        self.update_sequence_number()  # ack belongs to previous packet
-                        self.send_ack()
-                        correct_data = (
-                            False
-                        )  # received data belongs to a previous packet
+            self.socket.settimeout(None)
+            data, address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
+            op_code, seq_number, data = SaWPacket.parse_packet(data)
+            self.logger.debug(
+                f"[DATA] Received packet from port {address[1]} with seq_number {seq_number} and op_code {op_code}"
+            )
+            if op_code == OperationCodes.DATA and self.valid_opposite_address(address):
+                if self.valid_seq_number(seq_number):
+                    self.send_ack()
                     self.update_sequence_number()
-                    return data, correct_data
-            except timeout:
-                pass  # shouldn't throw an exception, should just keep iterating
+                    return data
+                else:  # duplicate packet, should discard and send inverted ack
+                    self.logger.warning(
+                        f"Received duplicate packet with seq_number {seq_number} and op_code {op_code}"
+                    )
+                    self.send_ack(invert_ack=True)
+                    # self.update_sequence_number()
 
     def receive_sv_information(self):
         while True:

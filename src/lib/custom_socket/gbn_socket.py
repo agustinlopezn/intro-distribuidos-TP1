@@ -1,19 +1,22 @@
 from random import random
-from lib.packet.saw_packet import SaWPacket
+from lib.packet.gbn_packet import GBNPacket
 from .custom_socket import CustomSocket, timeout
 from lib.protocol_handler import OperationCodes
 
-DROP_PROBABILITY = 0.1
+DROP_PROBABILITY = 0
 
 
 def drop_packet():
     return random() < DROP_PROBABILITY
 
+
 class GBNSocket(CustomSocket):
     RWND = 2
 
     def __init__(self, **kwargs):
-        self.seq_number = 0
+        self.seq_number = -1
+        self.last_packet_sent = -1
+        self.last_packet_acked = -1
         super().__init__(**kwargs)
 
     def _send(self, packet):
@@ -28,7 +31,7 @@ class GBNSocket(CustomSocket):
         self.socket.sendto(packet, self.opposite_address)
 
     def generate_packet(self, op_code, data):
-        packet = SaWPacket.generate_packet(
+        packet = GBNPacket.generate_packet(
             op_code=op_code, seq_number=self.seq_number, data=data
         )
         return packet
@@ -74,154 +77,142 @@ class GBNSocket(CustomSocket):
             )
 
     def send_ack(self):
-        packet = SaWPacket.generate_packet(
+        packet = GBNPacket.generate_packet(
             op_code=OperationCodes.ACK, seq_number=self.seq_number, data="".encode()
         )
         self._send(packet)
 
-    def send_data(self, data):
-        op_code = OperationCodes.DATA
-        max_packet_size = SaWPacket.MAX_PAYLOAD_SIZE
-        self.logger.debug(f"Sending {len(data)} bytes")
+    def consecutive_seq_number(self, seq_number):
+        # seq_number must be last acked + 1
+        return seq_number == self.seq_number + 1
+
+    def update_sequence_number(self):
+        self.seq_number += 1
+
+    def receive_data(self):
+        packages = []
+        self.seq_number = -1
+        while True:
+            self.socket.settimeout(None)
+            data, address = self.socket.recvfrom(GBNPacket.MAX_PACKET_SIZE)
+            op_code, seq_number, data = GBNPacket.parse_packet(data)
+            self.logger.debug(
+                f"[DATA] Received packet from port {address[1]} with seq_number {seq_number} and op_code {op_code}"
+            )
+            if op_code == OperationCodes.DATA:
+                if self.consecutive_seq_number(seq_number):
+                    self.update_sequence_number()
+                    self.send_ack()
+                    packages.append(data)
+                else:
+                    self.send_ack()
+            elif op_code == OperationCodes.END:
+                self.send_ack()
+                break
+        return b"".join(packages)
         
+    def send_end(self):
+        self._send_and_wait(OperationCodes.END, "".encode())
 
-        #Regla general:
-        #LastByteSent−LastByteAcked≤rwnd
-
-        #nuestra regla:
-        #paquete enviado - paquete recibido = rwnd
-
-        #enviar n paquetes
-
-        #esperar algun ack
-            #si ack aumenta el acknolewdeged packet number 
+    def send_data(self, data):
         self.last_packet_sent = -1
         self.last_packet_acked = -1
-        self.payloads = [] 
+        max_packet_size = GBNPacket.MAX_PAYLOAD_SIZE
+        self.payloads = []
         for head in range(0, len(data), max_packet_size):
             payload = data[head : head + max_packet_size]
             self.payloads.append(payload)
-
-        #payloads=[payload0, ... ,payloadn]
-        # last_packet_sent - last_packet_acked == rwnd
-        while self.last_packet_acked < len(self.payloads):
-            # 1) fijate cuantos paquetes podes enviar y envialos (esto actualiza last_packet_sent)
+        self.logger.debug(f"Sending {len(self.payloads)} packets")
+        while self.last_packet_acked < len(self.payloads) - 1:
             self.try_to_send_packets()
-            # 2) espera algun ack
             try:
-                self.wait_ack(self.last_packet_acked)
+                self.wait_ack()
             except timeout:
-                # logica de timeout
-                pass
-    
+                self.logger.debug(f"Handling timeout...")
+                self.last_packet_sent = self.last_packet_acked
+                self.logger.debug(f"Last packet sent: {self.last_packet_sent}")
+        self.logger.info("All payloads were acked")
+        self.send_end()
+
+    def handle_timeout(self):
+        self.logger.debug(f"Handling timeout...")
+        packets_sent_but_not_acked = self.last_packet_sent - self.last_packet_acked
+        packets_to_resend = min(packets_sent_but_not_acked, self.RWND)
+        self.logger.debug(f"Packets to resend: {packets_to_resend}")
+        starting_index = self.last_packet_acked + 1
+        ending_index = starting_index + packets_to_resend
+        for i in range(starting_index, ending_index):
+            payload = self.payloads[i]
+            self.send_packet(payload)
+
     def wait_ack(self):
+        self.logger.debug(f"Waiting for ack")
         self.socket.settimeout(10)
-        self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
-        data, address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
-        op_code, ack_number, data = SaWPacket.parse_packet(data)
+        data, address = self.socket.recvfrom(GBNPacket.HEADER_SIZE)
+        op_code, ack_number, _data = GBNPacket.parse_packet(data)
 
         if op_code == OperationCodes.ACK and self.valid_opposite_address(address):
             if ack_number > self.last_packet_acked:
+                self.logger.debug(f"Updating last packet acked to {ack_number}")
                 self.last_packet_acked = ack_number
 
     def try_to_send_packets(self):
-        # consulta la condicion de ventana 
-        # (last_packet_sent - last_packet_acked = in_traffic)
-        #  si rwnd > in_traffic entonces -> enviar mas paquetes sino no
-        
+        self.logger.debug(f"Trying to send packages...")
+        self.logger.debug(f"Last packet sent: {self.last_packet_sent}")
+        self.logger.debug(f"Last packet acked: {self.last_packet_acked}")
         packets_in_traffic = self.last_packet_sent - self.last_packet_acked
+        self.logger.debug(f"Packets in traffic: {packets_in_traffic}")
         while self.RWND > packets_in_traffic:
             if self.last_packet_sent == len(self.payloads) - 1:
                 break
             payload = self.payloads[self.last_packet_sent + 1]
-            
+            self.logger.debug(f"Sending packet {self.last_packet_sent + 1} ")
             self.send_packet(payload)
             self.last_packet_sent += 1
             packets_in_traffic += 1
 
     def send_packet(self, payload):
-        packet = SaWPacket.generate_packet(
-            op_code=OperationCodes.DATA, seq_number=self.last_packet_sent + 1, data=payload)
+        packet = GBNPacket.generate_packet(
+            op_code=OperationCodes.DATA,
+            seq_number=self.last_packet_sent + 1,
+            data=payload,
+        )
         self._send(packet)
-
-    # def _send_and_wait(self, op_code, data):
-    #     attemps = 5
-    #     packet = self.generate_packet(op_code, data)
-    #     while attemps > 0:
-    #         try:
-    #             self._send(packet)
-    #             data = self.receive_ack()
-    #             return data
-    #         except timeout:
-    #             attemps -= 1
-    #             self.logger.warning("TIMEOUT! Retrying...")
-    #     raise Exception("Connection timed out")
-
 
     def valid_seq_number(self, received_seq_number):
         return received_seq_number == self.seq_number
 
     def receive_ack(self):
         while True:
-            data, address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
-            op_code, seq_number, data = SaWPacket.parse_packet(data)
+            data, address = self.socket.recvfrom(GBNPacket.MAX_PACKET_SIZE)
+            op_code, seq_number, data = GBNPacket.parse_packet(data)
             if op_code == OperationCodes.NSQ_ACK and self.valid_opposite_address(
                 address
             ):
                 return data
-            if op_code == OperationCodes.ACK and self.valid_packet(address, seq_number):
+            if op_code == OperationCodes.ACK and self.valid_opposite_address(address):
                 self.logger.debug(f"Received ack with seq_number {seq_number}")
                 self.update_sequence_number()
                 return data
 
-    def update_sequence_number(self):
-        self.seq_number = int(not self.seq_number)
-        # self.seq_number += 1 # this way is better for debugging
-
-    def receive_data(self):
-        while True:
-            try:
-                data, address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
-                op_code, seq_number, data = SaWPacket.parse_packet(data)
-                self.logger.debug(
-                    f"[DATA] Received packet from port {address[1]} with seq_number {seq_number} and op_code {op_code}"
-                )
-                if op_code == OperationCodes.DATA:
-                    if self.valid_packet(address, seq_number):
-                        self.send_ack()
-                        correct_data = True  # received data is correct
-                    else:  # duplicate packet, should discard and send inverted ack
-                        self.logger.warning(
-                            f"Received duplicate packet with seq_number {seq_number}"
-                        )
-                        self.update_sequence_number()  # ack belongs to previous packet
-                        self.send_ack()
-                        correct_data = (
-                            False
-                        )  # received data belongs to a previous packet
-                    self.update_sequence_number()
-                    return data, correct_data
-            except timeout:
-                pass  # shouldn't throw an exception, should just keep iterating
-
     def receive_sv_information(self):
         while True:
-            data, address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
-            op_code, seq_number, data = SaWPacket.parse_packet(data)
+            data, address = self.socket.recvfrom(GBNPacket.MAX_PACKET_SIZE)
+            op_code, seq_number, data = GBNPacket.parse_packet(data)
             if op_code == OperationCodes.SV_INTRODUCTION:
                 self.logger.debug(f"Received server information: {data}")
                 self.opposite_address = address
                 return data
 
     def receive_first_connection(self):
-        msg, client_address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
-        op_code = SaWPacket.get_op_code(msg)
+        msg, client_address = self.socket.recvfrom(GBNPacket.MAX_PACKET_SIZE)
+        op_code = GBNPacket.get_op_code(msg)
         self.logger.debug(
             f"Receiving first connection from client at port: {client_address[1]}"
         )
         if op_code not in (OperationCodes.DOWNLOAD, OperationCodes.UPLOAD):
             raise Exception("Invalid operation code")
-        return op_code, client_address, SaWPacket.get_packet_data(msg).decode()
+        return op_code, client_address, GBNPacket.get_packet_data(msg).decode()
 
     def valid_opposite_address(self, address):
         return address == self.opposite_address

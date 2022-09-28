@@ -1,5 +1,5 @@
 import threading
-
+from lib.custom_socket.gbn_socket import GBNSocket
 from lib.custom_socket.saw_socket import SaWSocket
 from lib.logger import Logger
 
@@ -9,7 +9,7 @@ class FileHandler:
 
     def __init__(self, opposite_address, host="", port=0):
         super().__init__()
-        self.socket = SaWSocket(
+        self.socket = GBNSocket(
             opposite_address=opposite_address, timeout=3, host=host, port=port
         )
         self.opposite_address = opposite_address
