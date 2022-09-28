@@ -3,7 +3,7 @@ from lib.packet.saw_packet import SaWPacket
 from .custom_socket import CustomSocket, timeout
 from lib.protocol_handler import OperationCodes
 
-DROP_PROBABILITY = 0.1
+DROP_PROBABILITY = 0.0
 
 
 def drop_packet():

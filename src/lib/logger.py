@@ -1,9 +1,8 @@
-import coloredlogs, logging
+import logging
 from colorlog import ColoredFormatter
 
 
 class Logger(object):
-    coloredlogs.install()
 
     def __init__(self, name):
         self.logger = logging.getLogger(name)
@@ -11,7 +10,7 @@ class Logger(object):
         message_format = "  %(log_color)s%(levelname)-8s%(reset)s | %(log_color)s%(message)s%(reset)s"
         formatter = ColoredFormatter(message_format)
         self.ch = logging.StreamHandler()
-        self.ch.setLevel(logging.DEBUG)
+        # self.ch.setLevel(logging.DEBUG)
         self.ch.setFormatter(formatter)
         self.logger.addHandler(self.ch)
 
