@@ -3,3 +3,6 @@
 A corregir:
   - Contemplar que el archivo no exista
   - En Upload, a veces, se manda todo el archivo, pero el cliente no termina.
+
+GBN:
+  - Cada vez que se termina de mandar un chunk, se manda un END. El problema es que el ACK de ese END se manda una sola vez. 

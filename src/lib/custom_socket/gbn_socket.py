@@ -12,6 +12,7 @@ def drop_packet():
 
 class GBNSocket(CustomSocket):
     RWND = 2
+    MAX_ATTEMPS = 5
 
     def __init__(self, **kwargs):
         self.seq_number = -1
@@ -107,7 +108,8 @@ class GBNSocket(CustomSocket):
                 else:
                     self.send_ack()
             elif op_code == OperationCodes.END:
-                self.send_ack()
+                for i in range(self.MAX_ATTEMPS):
+                    self.send_nsq_ack()
                 break
         return b"".join(packages)
         
@@ -223,13 +225,13 @@ class GBNSocket(CustomSocket):
         )
 
     def _send_and_wait(self, op_code, data):
-        attemps = 5
+        attemps = self.MAX_ATTEMPS
         packet = self.generate_packet(op_code, data)
         while attemps > 0:
             try:
                 self._send(packet)
-                data = self.receive_ack()
-                return data
+                self.receive_ack()
+                return
             except timeout:
                 attemps -= 1
                 self.logger.warning("TIMEOUT! Retrying...")
