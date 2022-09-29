@@ -14,6 +14,7 @@ def drop_packet():
 class SaWSocket(CustomSocket):
     def __init__(self, **kwargs):
         self.seq_number = 0
+        self.packet_type = SaWPacket
         super().__init__(**kwargs)
 
     def _send(self, packet):

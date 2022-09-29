@@ -1,4 +1,6 @@
 from socket import socket, AF_INET, SOCK_DGRAM, timeout
+from src.lib.protocol_handler import OperationCodes
+from src.lib.saboteur import Saboteur
 from src.lib.logger import Logger
 
 
@@ -12,6 +14,19 @@ class CustomSocket:
         # Bind to a random port if no port and host are specified
         self.set_timeout(timeout)
         self.logger = logger
+        self.saboteur = Saboteur(self._send, self.packet_type, logger)
+
+    def _send(self, packet):
+        seq_number = self.packet_type.determine_seq_number(packet[1:5])
+        self.logger.debug(
+            f"Sending packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number} from port {self.port}"
+        )
+        if self.saboteur.sabotage_packet(packet):
+            return
+        try:
+            self.socket.sendto(packet, self.opposite_address)
+        except PermissionError as e:
+            self.logger.warning(f"Dropping packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number}")
 
     def set_timeout(self, timeout):
         self.socket.settimeout(timeout)

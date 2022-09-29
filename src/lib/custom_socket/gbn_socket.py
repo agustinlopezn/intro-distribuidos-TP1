@@ -1,13 +1,14 @@
 from random import random
+from src.lib.saboteur import Saboteur
 from src.lib.packet.gbn_packet import GBNPacket
 from .custom_socket import CustomSocket, timeout
 from src.lib.protocol_handler import OperationCodes
 
-DROP_PROBABILITY = 0
+DELAY_PROBABILITY = 0.1
 
 
-def drop_packet():
-    return random() < DROP_PROBABILITY
+def delay_packet():
+    return random() < DELAY_PROBABILITY
 
 
 class GBNSocket(CustomSocket):
@@ -15,23 +16,9 @@ class GBNSocket(CustomSocket):
     MAX_ATTEMPS = 5
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
         self.seq_number = -1
-
-    def _send(self, packet):
-        seq_number = GBNPacket.determine_seq_number(packet[1:5])
-        self.logger.debug(
-            f"Sending packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number} from port {self.port}"
-        )
-        if drop_packet():
-            self.logger.debug(
-                f"Dropping packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number}"
-            )
-            return
-        try:
-            self.socket.sendto(packet, self.opposite_address)
-        except PermissionError as e:
-            self.logger.warning(f"Dropping packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number}")
+        self.packet_type = GBNPacket
+        super().__init__(**kwargs)
 
     def generate_packet(self, op_code, data):
         packet = GBNPacket.generate_packet(
