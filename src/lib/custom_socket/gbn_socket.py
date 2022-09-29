@@ -32,23 +32,6 @@ class GBNSocket(CustomSocket):
             return str(file_size).encode()
         return f"{port}#{file_size}".encode()
 
-    def send_dl_request(self, file_name):
-        self.logger.debug(
-            f"Sending download request with port {self.port}, file_name {file_name}"
-        )
-        packet = self.generate_packet(
-            op_code=OperationCodes.DOWNLOAD, data=file_name.encode()
-        )
-        return self._send(packet)
-
-    def send_up_request(self, file_name, file_size=None):
-        self.logger.debug(
-            f"Sending upload request with port {self.port}, file_name {file_name} and file_size {file_size}"
-        )
-        data = self.serialize_information(file_name, file_size)
-        packet = self.generate_packet(op_code=OperationCodes.UPLOAD, data=data)
-        self._send(packet)
-
     def send_sv_information(self, file_size=None):
         self.logger.debug(
             f"Sending server information: port = {self.port}, file_size = {file_size}"
@@ -180,25 +163,6 @@ class GBNSocket(CustomSocket):
                 self.logger.debug(f"Received ack with seq_number {seq_number}")
                 self.update_sequence_number()
                 return data
-
-    def receive_sv_information(self):
-        while True:
-            data, address = self.socket.recvfrom(GBNPacket.MAX_PACKET_SIZE)
-            op_code, seq_number, data = GBNPacket.parse_packet(data)
-            if op_code == OperationCodes.SV_INTRODUCTION:
-                self.logger.debug(f"Received server information: {data}")
-                self.opposite_address = address
-                return data
-
-    def receive_first_connection(self):
-        msg, client_address = self.socket.recvfrom(GBNPacket.MAX_PACKET_SIZE)
-        op_code = GBNPacket.get_op_code(msg)
-        self.logger.debug(
-            f"Receiving first connection from client at port: {client_address[1]}"
-        )
-        if op_code not in (OperationCodes.DOWNLOAD, OperationCodes.UPLOAD):
-            raise Exception("Invalid operation code")
-        return op_code, client_address, GBNPacket.get_packet_data(msg).decode()
 
     def valid_opposite_address(self, address):
         return address == self.opposite_address

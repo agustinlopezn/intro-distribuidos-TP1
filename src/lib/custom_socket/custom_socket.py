@@ -30,6 +30,50 @@ class CustomSocket:
                 f"Dropping packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number}"
             )
 
+    #############################
+    #   HANDSHAKE METHODS     #
+    #############################
+
+    def receive_sv_information(self):
+        self.socket.settimeout(None)
+        while True:
+            data, address = self.socket.recvfrom(self.packet_type.MAX_PACKET_SIZE)
+            op_code, seq_number, data = self.packet_type.parse_packet(data)
+            if op_code == OperationCodes.SV_INTRODUCTION:
+                self.logger.debug(f"Received server information: {data}")
+                self.opposite_address = address
+                self.socket.settimeout(self.TIMEOUT)
+                return data
+
+    def receive_first_connection(self):
+        msg, client_address = self.socket.recvfrom(self.packet_type.MAX_PACKET_SIZE)
+        op_code = self.packet_type.get_op_code(msg)
+        self.logger.debug(
+            f"Receiving first connection from client at port: {client_address[1]}"
+        )
+        if op_code not in (OperationCodes.DOWNLOAD, OperationCodes.UPLOAD):
+            raise Exception("Invalid operation code")
+        return op_code, client_address, self.packet_type.get_packet_data(msg).decode()
+
+    def send_dl_request(self, file_name):
+        self.logger.debug(
+            f"Sending download request with port {self.port}, file_name {file_name}"
+        )
+        packet = self.generate_packet(
+            op_code=OperationCodes.DOWNLOAD, data=file_name.encode()
+        )
+        return self._send(packet)
+
+    def send_up_request(self, file_name, file_size=None):
+        self.logger.debug(
+            f"Sending upload request with port {self.port}, file_name {file_name} and file_size {file_size}"
+        )
+        data = self.serialize_information(file_name, file_size)
+        packet = self.generate_packet(op_code=OperationCodes.UPLOAD, data=data)
+        self._send(packet)
+
+    #############################
+
     def set_timeout(self, timeout):
         self.socket.settimeout(timeout)
 
@@ -37,9 +81,6 @@ class CustomSocket:
         raise NotImplementedError
 
     def receive(self):
-        raise NotImplementedError
-
-    def send_dl_request(self):
         raise NotImplementedError
 
     @property
