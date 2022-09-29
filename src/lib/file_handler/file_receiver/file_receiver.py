@@ -25,7 +25,8 @@ class FileReceiver(FileHandler):
         self._handle_receive_process()
         finish_time = time.time()
         self.logger.info(
-            f"File {self.file_name} received in {finish_time - start_time} seconds"
+            f"File {self.file_name} received in %.2f seconds"
+            % (finish_time - start_time)
         )
 
     def receive_file(self, showProgress=True):

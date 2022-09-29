@@ -15,8 +15,7 @@ class FileSender(FileHandler):
         self._handle_send_process()
         finish_time = time.time()
         self.logger.info(
-            f"File {self.file_name} received in %.2f seconds"
-            % (finish_time - start_time)
+            f"File {self.file_name} sent in %.2f seconds" % (finish_time - start_time)
         )
 
     def send_file(self, showProgress=True):

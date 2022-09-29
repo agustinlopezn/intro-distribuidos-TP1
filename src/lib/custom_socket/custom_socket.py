@@ -7,12 +7,12 @@ from src.lib.logger import Logger
 class CustomSocket:
     __abstract__ = True
 
-    def __init__(self, opposite_address=None, timeout=5, host="", port=0, logger=None):
+    def __init__(self, opposite_address=None, host="", port=0, logger=None):
         self.opposite_address = opposite_address
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.socket.bind((host, port))
         # Bind to a random port if no port and host are specified
-        self.set_timeout(timeout)
+        self.set_timeout(self.TIMEOUT)
         self.logger = logger
         self.saboteur = Saboteur(self._send, self.packet_type, logger)
 

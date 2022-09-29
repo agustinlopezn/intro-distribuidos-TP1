@@ -13,3 +13,7 @@ No es necesario que el seq_number de GBN sea de 4 bytes xq se reinicia cada vez 
    techo(CHUNK_SIZE / PACKET_SIZE) < 255, un byte debería alcanzar
    
 Falta descartar archivos que excedan el tamaño máximo (4 GB en principio)
+
+Si el server no esta levantado y el cliente quiere hacer una accion -> no pasa nada. manda el up,down y se queda esperando.
+
+El tiempo del server tiene que ir al thread (sino es instantaneo)

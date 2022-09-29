@@ -11,7 +11,6 @@ class FileHandler:
         super().__init__()
         self.socket = SaWSocket(
             opposite_address=opposite_address,
-            timeout=3,
             host=host,
             port=port,
             logger=logger,

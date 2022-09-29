@@ -1,19 +1,14 @@
-from random import random
-from src.lib.saboteur import Saboteur
+from pexpect import TIMEOUT
 from src.lib.packet.gbn_packet import GBNPacket
 from .custom_socket import CustomSocket, timeout
 from src.lib.operation_codes import OperationCodes
-
-DELAY_PROBABILITY = 0.1
-
-
-def delay_packet():
-    return random() < DELAY_PROBABILITY
 
 
 class GBNSocket(CustomSocket):
     RWND = 20
     MAX_ATTEMPS = 5
+    TIMEOUT = 2
+    PROCESS_TIMEOUT = 10  # Capaz se usa el timeout del custom socket
 
     def __init__(self, **kwargs):
         self.seq_number = -1
@@ -138,7 +133,7 @@ class GBNSocket(CustomSocket):
 
     def wait_ack(self):
         self.logger.debug(f"Waiting for ack")
-        self.socket.settimeout(10)
+        self.socket.settimeout(self.PROCESS_TIMEOUT)
         data, address = self.socket.recvfrom(GBNPacket.HEADER_SIZE)
         op_code, ack_number, _data = GBNPacket.parse_packet(data)
 

@@ -11,7 +11,7 @@ from src.lib.file_handler.file_receiver.client_file_receiver import (
 from src.lib.operation_codes import OperationCodes
 
 HOST = "127.0.0.1"
-CLIENT_PORT = 5000
+CLIENT_PORT = 6000
 
 
 class Client:
@@ -42,4 +42,3 @@ class Client:
             host=HOST,
             port=CLIENT_PORT,
         ).handle_receive_process()
-

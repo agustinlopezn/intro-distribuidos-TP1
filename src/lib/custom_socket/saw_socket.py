@@ -1,17 +1,12 @@
-from random import random
 from src.lib.packet.saw_packet import SaWPacket
 from .custom_socket import CustomSocket, timeout
 from src.lib.operation_codes import OperationCodes
-import socket
-
-DROP_PROBABILITY = 0.0
-
-
-def drop_packet():
-    return random() < DROP_PROBABILITY
 
 
 class SaWSocket(CustomSocket):
+    MAX_ATTEMPS = 5
+    TIMEOUT = 2
+
     def __init__(self, **kwargs):
         self.seq_number = 0
         self.packet_type = SaWPacket
@@ -120,12 +115,14 @@ class SaWSocket(CustomSocket):
                     self.send_ack(invert_ack=True)
 
     def receive_sv_information(self):
+        self.socket.settimeout(None)
         while True:
             data, address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
             op_code, seq_number, data = SaWPacket.parse_packet(data)
             if op_code == OperationCodes.SV_INTRODUCTION:
                 self.logger.debug(f"Received server information: {data}")
                 self.opposite_address = address
+                self.socket.settimeout(self.TIMEOUT)
                 return data
 
     def receive_first_connection(self):
@@ -147,15 +144,13 @@ class SaWSocket(CustomSocket):
         )
 
     def _send_and_wait(self, op_code, data):
-        attemps = 5
         packet = self.generate_packet(op_code, data)
-        while attemps > 0:
+        for i in range(self.MAX_ATTEMPS):
             try:
                 self._send(packet)
                 data = self.receive_ack()
                 return data
             except timeout:
-                attemps -= 1
                 self.logger.warning("TIMEOUT! Retrying...")
         raise Exception("Connection timed out")
 
