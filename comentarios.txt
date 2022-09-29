@@ -6,3 +6,5 @@ A corregir:
 
 GBN:
   - Cada vez que se termina de mandar un chunk, se manda un END. El problema es que el ACK de ese END se manda una sola vez. 
+
+El puerto del cliente se HARDCODEA para poder simular pérdida de paquetes con iptables.

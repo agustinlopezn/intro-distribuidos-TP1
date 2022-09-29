@@ -15,9 +15,6 @@ class GBNSocket(CustomSocket):
     MAX_ATTEMPS = 5
 
     def __init__(self, **kwargs):
-        self.seq_number = -1
-        self.last_packet_sent = -1
-        self.last_packet_acked = -1
         super().__init__(**kwargs)
 
     def _send(self, packet):

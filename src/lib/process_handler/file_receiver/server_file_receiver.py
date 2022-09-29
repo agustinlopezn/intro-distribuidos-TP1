@@ -10,8 +10,8 @@ class ServerFileReceiver(FileReceiver, Thread):
     def run(self):
         pass
 
-    def __init__(self, opposite_address, file_data):
-        super().__init__(opposite_address, DEST_FOLDER)
+    def __init__(self, file_data, **kwargs):
+        super().__init__(dest_folder=DEST_FOLDER, **kwargs)
         self.file_name = file_data.split("#")[0]
         self.file_size = int(file_data.split("#")[1])
         Thread.__init__(self)

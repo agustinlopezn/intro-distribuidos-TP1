@@ -8,8 +8,8 @@ SRC_FOLDER = "../files/source"
 
 
 class ClientFileSender(FileSender):
-    def __init__(self, file_name, opposite_address, host="", port=0):
-        super().__init__(opposite_address, SRC_FOLDER, host, port)
+    def __init__(self, file_name, logger, **kwargs):
+        super().__init__(src_folder=SRC_FOLDER, **kwargs)
         self.file_name = file_name
 
     def handle_send_process(self):

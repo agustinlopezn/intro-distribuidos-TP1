@@ -9,8 +9,8 @@ DEST_FOLDER = "../files/downloaded/"
 
 
 class ClientFileReceiver(FileReceiver):
-    def __init__(self, file_name, opposite_address, host="", port=0):
-        super().__init__(opposite_address, DEST_FOLDER, host, port)
+    def __init__(self, file_name, **kwargs):
+        super().__init__(**kwargs)
         self.file_name = file_name
 
     def handle_receive_process(self):

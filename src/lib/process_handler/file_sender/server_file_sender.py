@@ -7,8 +7,8 @@ SRC_FOLDER = "../files/uploaded/"
 
 
 class ServerFileSender(FileSender, Thread):
-    def __init__(self, opposite_address, file_data):
-        super().__init__(opposite_address, SRC_FOLDER)
+    def __init__(self, file_data, **kwargs):
+        super().__init__(src_folder=SRC_FOLDER, **kwargs)
         self.file_name = file_data
         Thread.__init__(self)
 
