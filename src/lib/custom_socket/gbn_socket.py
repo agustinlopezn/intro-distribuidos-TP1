@@ -1,7 +1,7 @@
 from random import random
-from lib.packet.gbn_packet import GBNPacket
+from src.lib.packet.gbn_packet import GBNPacket
 from .custom_socket import CustomSocket, timeout
-from lib.protocol_handler import OperationCodes
+from src.lib.protocol_handler import OperationCodes
 
 DROP_PROBABILITY = 0
 
@@ -16,6 +16,7 @@ class GBNSocket(CustomSocket):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.seq_number = -1
 
     def _send(self, packet):
         self.logger.debug(
@@ -109,7 +110,7 @@ class GBNSocket(CustomSocket):
                     self.send_nsq_ack()
                 break
         return b"".join(packages)
-        
+
     def send_end(self):
         self._send_and_wait(OperationCodes.END, "".encode())
 

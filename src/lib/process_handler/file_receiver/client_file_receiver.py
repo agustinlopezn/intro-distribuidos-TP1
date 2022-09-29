@@ -1,11 +1,11 @@
 from threading import Thread
-from lib.custom_socket.saw_socket import SaWSocket
-from lib.process_handler.file_receiver.file_receiver import FileReceiver
-from lib.protocol_handler import OperationCodes
+from src.lib.custom_socket.saw_socket import SaWSocket
+from src.lib.process_handler.file_receiver.file_receiver import FileReceiver
+from src.lib.protocol_handler import OperationCodes
 
 PORT = 5000
 BUFF_SIZE = 1024
-DEST_FOLDER = "../files/downloaded/"
+DEST_FOLDER = "files/downloaded/"
 
 
 class ClientFileReceiver(FileReceiver):

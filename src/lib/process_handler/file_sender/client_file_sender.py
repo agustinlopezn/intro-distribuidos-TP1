@@ -1,14 +1,14 @@
-from lib.custom_socket.saw_socket import SaWSocket
-from lib.process_handler.file_sender.file_sender import FileSender
-from lib.protocol_handler import OperationCodes
+from src.lib.custom_socket.saw_socket import SaWSocket
+from src.lib.process_handler.file_sender.file_sender import FileSender
+from src.lib.protocol_handler import OperationCodes
 
 PORT = 5000
 BUFF_SIZE = 1024
-SRC_FOLDER = "../files/source"
+SRC_FOLDER = "files/source"
 
 
 class ClientFileSender(FileSender):
-    def __init__(self, file_name, logger, **kwargs):
+    def __init__(self, file_name, **kwargs):
         super().__init__(src_folder=SRC_FOLDER, **kwargs)
         self.file_name = file_name
 
@@ -20,7 +20,9 @@ class ClientFileSender(FileSender):
 
     def handle_handshake(self):
         self.file_size = self.get_file_size(self.file_name)
-        self.logger.info(f"{self.file_size} bytes will be sent to port {self.socket.port}")
+        self.logger.info(
+            f"{self.file_size} bytes will be sent to port {self.socket.port}"
+        )
         self.socket.send_up_request(self.file_name, self.file_size)
         self.socket.receive_sv_information()
         self.socket.send_nsq_ack()

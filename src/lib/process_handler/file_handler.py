@@ -1,7 +1,7 @@
 import threading
-from lib.custom_socket.gbn_socket import GBNSocket
-from lib.custom_socket.saw_socket import SaWSocket
-from lib.logger import Logger
+from src.lib.custom_socket.gbn_socket import GBNSocket
+from src.lib.custom_socket.saw_socket import SaWSocket
+from src.lib.logger import Logger
 
 
 class FileHandler:

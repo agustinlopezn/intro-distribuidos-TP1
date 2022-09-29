@@ -28,11 +28,15 @@ class ExecutionOptions:
             else -1
         )
         self.port = (
-            self.arguments[port_index + 1] if port_index > -1 else self.DEFAULT_SERVER_PORT
+            self.arguments[port_index + 1]
+            if port_index > -1
+            else self.DEFAULT_SERVER_PORT
         )
 
 
 class ClientOptions(ExecutionOptions):
+    DEFAULT_FILE_NAME = "test.pdf"
+
     def __init__(self, arguments):
         super().__init__(arguments)
 
@@ -46,7 +50,9 @@ class ClientOptions(ExecutionOptions):
             else -1
         )
         self.file_name = (
-            self.arguments[self.name_index + 1] if self.name_index > -1 else None
+            self.arguments[self.file_name_index + 1]
+            if self.file_name_index > -1
+            else self.DEFAULT_FILE_NAME
         )
 
 

@@ -1,7 +1,7 @@
 import os
 from threading import Thread
 
-from lib.process_handler.file_handler import FileHandler
+from src.lib.process_handler.file_handler import FileHandler
 
 
 class FileSender(FileHandler):

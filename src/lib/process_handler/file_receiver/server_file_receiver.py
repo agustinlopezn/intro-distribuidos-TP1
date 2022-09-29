@@ -1,9 +1,9 @@
 from threading import Thread
-from lib.process_handler.file_receiver.file_receiver import FileReceiver
-from lib.process_handler.file_sender.file_sender import FileSender
-from lib.protocol_handler import OperationCodes
+from src.lib.process_handler.file_receiver.file_receiver import FileReceiver
+from src.lib.process_handler.file_sender.file_sender import FileSender
+from src.lib.protocol_handler import OperationCodes
 
-DEST_FOLDER = "../files/uploaded/"
+DEST_FOLDER = "files/uploaded/"
 
 
 class ServerFileReceiver(FileReceiver, Thread):

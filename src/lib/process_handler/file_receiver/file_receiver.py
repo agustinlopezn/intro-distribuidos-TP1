@@ -1,12 +1,12 @@
 import os
 from threading import Thread
-from lib.custom_socket.saw_socket import SaWSocket
-from lib.process_handler.file_handler import FileHandler
+from src.lib.custom_socket.saw_socket import SaWSocket
+from src.lib.process_handler.file_handler import FileHandler
 
 
 class FileReceiver(FileHandler):
-    def __init__(self, opposite_address, destination_folder, logger, host="", port=0):
-        self.destination_folder = destination_folder
+    def __init__(self, opposite_address, dest_folder, logger, host="", port=0):
+        self.destination_folder = dest_folder
         super().__init__(
             opposite_address=opposite_address, host=host, port=port, logger=logger
         )

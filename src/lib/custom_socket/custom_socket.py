@@ -1,5 +1,5 @@
 from socket import socket, AF_INET, SOCK_DGRAM, timeout
-from lib.logger import Logger
+from src.lib.logger import Logger
 
 
 class CustomSocket:

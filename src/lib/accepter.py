@@ -1,12 +1,10 @@
-import socket
-from lib.custom_socket.saw_socket import SaWSocket
-from lib.protocol_handler import OperationCodes
+from src.lib.custom_socket.gbn_socket import GBNSocket
+from src.lib.custom_socket.saw_socket import SaWSocket
 
 
 class Accepter:
-    def __init__(self, host, port, socket_type):
-        self.socket_type = socket_type
-        self.socket = socket_type(opposite_address=None, host=host, port=port)
+    def __init__(self, **kwargs):
+        self.socket = GBNSocket(opposite_address=None, **kwargs)
         self.socket.set_timeout(None)
 
     def accept(self):

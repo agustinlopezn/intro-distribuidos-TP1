@@ -1,9 +1,9 @@
 import os
 from threading import Thread
-from lib.process_handler.file_sender.file_sender import FileSender
-from lib.protocol_handler import OperationCodes
+from src.lib.process_handler.file_sender.file_sender import FileSender
+from src.lib.protocol_handler import OperationCodes
 
-SRC_FOLDER = "../files/uploaded/"
+SRC_FOLDER = "files/uploaded/"
 
 
 class ServerFileSender(FileSender, Thread):

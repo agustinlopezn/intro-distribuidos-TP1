@@ -1,14 +1,15 @@
 from .packet import Packet
-from lib.protocol_handler import OperationCodes
-
+from src.lib.protocol_handler import OperationCodes
 
 
 import socket
 import sys
+
+
 class SaWPacket(Packet):
     MAX_PAYLOAD_SIZE = 1022
     HEADER_SIZE = 5
-    MAX_PACKET_SIZE = HEADER_SIZE + MAX_PAYLOAD_SIZE 
+    MAX_PACKET_SIZE = HEADER_SIZE + MAX_PAYLOAD_SIZE
 
     @classmethod
     def generate_packet(cls, op_code, seq_number, data):
@@ -16,7 +17,7 @@ class SaWPacket(Packet):
         bytes_seq_number = seq_number.to_bytes(4, byteorder="big")
         bytes = bytearray(cls.HEADER_SIZE + len(data))
         bytes[0] = op_code
-        bytes[1:5] = bytes_seq_number # need a more generic name
+        bytes[1:5] = bytes_seq_number  # need a more generic name
         bytes[5:] = data
         return bytes
 
@@ -24,7 +25,7 @@ class SaWPacket(Packet):
     def parse_packet(packet):
         op_code = packet[0]
         bytes_seq_number = packet[1:5]
-        seq_number = int.from_bytes(bytes_seq_number, byteorder='big', signed=False)
+        seq_number = int.from_bytes(bytes_seq_number, byteorder="big", signed=False)
         seq_number = socket.ntohl(seq_number)
         data = packet[5:]
         return op_code, seq_number, data
