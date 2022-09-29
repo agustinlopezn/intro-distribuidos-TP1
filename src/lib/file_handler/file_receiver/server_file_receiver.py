@@ -23,7 +23,7 @@ class ServerFileReceiver(FileReceiver, Thread):
         self.receive_file()
         self.socket.close_connection()
 
-    def handle_receive_process(self):
+    def _handle_receive_process(self):
         # just for polymorphism purposes
         self.start()
 

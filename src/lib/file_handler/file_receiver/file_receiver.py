@@ -2,6 +2,7 @@ import os
 from threading import Thread
 from src.lib.custom_socket.saw_socket import SaWSocket
 from src.lib.file_handler.file_handler import FileHandler
+import time
 
 
 class FileReceiver(FileHandler):
@@ -20,7 +21,12 @@ class FileReceiver(FileHandler):
         return file_name
 
     def handle_receive_process(self):
-        raise NotImplementedError
+        start_time = time.time()
+        self._handle_receive_process()
+        finish_time = time.time()
+        self.logger.info(
+            f"File {self.file_name} received in {finish_time - start_time} seconds"
+        )
 
     def receive_file(self, showProgress=True):
         file_name = self.get_valid_name(f"{self.destination_folder}/{self.file_name}")

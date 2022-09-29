@@ -15,7 +15,7 @@ class ServerFileSender(FileSender, Thread):
         self.send_file()
         self.socket.close_connection()
 
-    def handle_send_process(self):
+    def _handle_send_process(self):
         # just for polymorphism purposes
         self.start()
 

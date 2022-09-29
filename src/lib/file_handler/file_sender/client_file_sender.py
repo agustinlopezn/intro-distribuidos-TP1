@@ -8,7 +8,7 @@ class ClientFileSender(FileSender):
         super().__init__(**kwargs)
         self.file_name = file_name
 
-    def handle_send_process(self):
+    def _handle_send_process(self):
         self.logger.info(f"Starting file sending process for file {self.file_name}")
         self.handle_handshake()
         self.send_file()

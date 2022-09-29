@@ -1,7 +1,6 @@
 import os
-from threading import Thread
-
 from src.lib.file_handler.file_handler import FileHandler
+import time
 
 
 class FileSender(FileHandler):
@@ -12,7 +11,13 @@ class FileSender(FileHandler):
         self.source_folder = src_folder
 
     def handle_send_process(self):
-        raise NotImplementedError
+        start_time = time.time()
+        self._handle_send_process()
+        finish_time = time.time()
+        self.logger.info(
+            f"File {self.file_name} received in %.2f seconds"
+            % (finish_time - start_time)
+        )
 
     def send_file(self, showProgress=True):
         self.logger.debug(f"Sending {self.file_name}")
@@ -35,9 +40,7 @@ class FileSender(FileHandler):
                     "There was en error while sending the file, but it is likely that the file was received correctly"
                 )
             else:
-                self.logger.error(
-                    "There was an error while sending the file"
-                )
+                self.logger.error("There was an error while sending the file")
 
     def get_file_size(self, file_name):
         return os.stat(f"{self.source_folder}/{file_name}").st_size

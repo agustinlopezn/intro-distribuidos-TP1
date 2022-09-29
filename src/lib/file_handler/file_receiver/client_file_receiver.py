@@ -11,7 +11,7 @@ class ClientFileReceiver(FileReceiver):
         super().__init__(**kwargs)
         self.file_name = file_name
 
-    def handle_receive_process(self):
+    def _handle_receive_process(self):
         self.logger.info(f"Starting file receiving process for file {self.file_name}")
         self.handle_process_start()
         self.receive_file()
