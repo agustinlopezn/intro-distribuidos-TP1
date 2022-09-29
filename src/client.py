@@ -23,6 +23,7 @@ class Client:
         server_address = (options.host, options.port)
         ClientFileSender(
             options.file_name,
+            src_folder = options.src,
             logger=logger,
             opposite_address=server_address,
             host=HOST,
@@ -36,6 +37,7 @@ class Client:
         server_address = (options.host, options.port)
         ClientFileReceiver(
             options.file_name,
+            dest_folder=options.dst,
             logger=logger,
             opposite_address=server_address,
             host=HOST,

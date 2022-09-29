@@ -3,8 +3,6 @@ from src.lib.custom_socket.saw_socket import SaWSocket
 from src.lib.process_handler.file_receiver.file_receiver import FileReceiver
 from src.lib.protocol_handler import OperationCodes
 
-PORT = 5000
-BUFF_SIZE = 1024
 DEST_FOLDER = "files/downloaded/"
 
 
@@ -20,7 +18,6 @@ class ClientFileReceiver(FileReceiver):
         self.socket.close_connection()
 
     def handle_process_start(self):
-        port = PORT
         self.socket.send_dl_request(self.file_name)
         data = self.socket.receive_sv_information()
         port, file_size = data.decode().split("#")

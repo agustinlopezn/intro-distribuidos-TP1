@@ -2,14 +2,10 @@ from src.lib.custom_socket.saw_socket import SaWSocket
 from src.lib.process_handler.file_sender.file_sender import FileSender
 from src.lib.protocol_handler import OperationCodes
 
-PORT = 5000
-BUFF_SIZE = 1024
-SRC_FOLDER = "files/source"
-
 
 class ClientFileSender(FileSender):
     def __init__(self, file_name, **kwargs):
-        super().__init__(src_folder=SRC_FOLDER, **kwargs)
+        super().__init__(**kwargs)
         self.file_name = file_name
 
     def handle_send_process(self):

@@ -16,6 +16,7 @@ from src.lib.thread_cleaner import ThreadCleaner
 from threading import Timer
 from sys import argv
 
+
 class Server:
     def __init__(self):
         self.threads = {}
@@ -32,17 +33,23 @@ class Server:
         while True:
             op_code, client_address, file_data = accepter.accept()
             if self.client_is_active(client_address):
-                print(f"Client {client_address} is already connected")
+                logger.error(f"Client {client_address} is already connected")
                 continue
             if op_code == OperationCodes.DOWNLOAD:
                 file_sender = ServerFileSender(
-                    file_data, opposite_address=client_address, logger=logger
+                    file_data,
+                    src_folder=options.storage,
+                    opposite_address=client_address,
+                    logger=logger,
                 )
                 file_sender.handle_send_process()
                 self.threads[client_address] = file_sender
             elif op_code == OperationCodes.UPLOAD:
                 file_receiver = ServerFileReceiver(
-                    file_data, opposite_address=client_address, logger=logger
+                    file_data,
+                    dest_folder=options.storage,
+                    opposite_address=client_address,
+                    logger=logger,
                 )
                 file_receiver.handle_receive_process()
                 self.threads[client_address] = file_receiver

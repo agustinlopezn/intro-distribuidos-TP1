@@ -128,7 +128,7 @@ class GBNSocket(CustomSocket):
             try:
                 self.wait_ack()
             except timeout:
-                self.logger.debug(f"Handling timeout...")
+                self.logger.warning(f"Handling timeout...")
                 self.last_packet_sent = self.last_packet_acked
                 self.logger.debug(f"Last packet sent: {self.last_packet_sent}")
         self.logger.info("All payloads were acked")

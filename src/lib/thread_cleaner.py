@@ -21,5 +21,4 @@ class ThreadCleaner(Thread):
         for client_address in addresses_to_delete:
             thread = self.active_threads[client_address]
             thread.join()
-            print("Cleaning thread")
             del self.active_threads[client_address]

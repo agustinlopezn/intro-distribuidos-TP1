@@ -3,12 +3,9 @@ from threading import Thread
 from src.lib.process_handler.file_sender.file_sender import FileSender
 from src.lib.protocol_handler import OperationCodes
 
-SRC_FOLDER = "files/uploaded/"
-
-
 class ServerFileSender(FileSender, Thread):
     def __init__(self, file_data, **kwargs):
-        super().__init__(src_folder=SRC_FOLDER, **kwargs)
+        super().__init__(**kwargs)
         self.file_name = file_data
         Thread.__init__(self)
 

@@ -15,21 +15,15 @@ class FileSender(FileHandler):
         raise NotImplementedError
 
     def send_file(self, showProgress=True):
-        print(f"Sending {self.file_name}")
+        self.logger.debug(f"Sending {self.file_name}")
         with open(f"{self.source_folder}/{self.file_name}", "rb") as file:
             bytes_sent = 0
             while bytes_sent < self.file_size:
                 data = file.read(self.CHUNK_SIZE)
-                try:
-                    print("Sending data...")
-                    self.socket.send_data(data)
-                    bytes_sent += len(data)
-                    print(f"Progress: {bytes_sent/self.file_size * 100:.0f}%")
-                except Exception as e:
-                    print(e)
-                    print(f"Progress: {bytes_sent/self.file_size * 100:.0f}%")
-                    break
-            print("")
+                self.logger.debug("Sending data...")
+                self.socket.send_data(data)
+                bytes_sent += len(data)
+                self.logger.info(f"Progress: {bytes_sent/self.file_size * 100:.0f}%")
             return bytes_sent
 
     def get_file_size(self, file_name):

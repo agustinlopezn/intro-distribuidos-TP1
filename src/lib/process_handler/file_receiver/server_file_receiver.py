@@ -3,15 +3,13 @@ from src.lib.process_handler.file_receiver.file_receiver import FileReceiver
 from src.lib.process_handler.file_sender.file_sender import FileSender
 from src.lib.protocol_handler import OperationCodes
 
-DEST_FOLDER = "files/uploaded/"
-
 
 class ServerFileReceiver(FileReceiver, Thread):
     def run(self):
         pass
 
     def __init__(self, file_data, **kwargs):
-        super().__init__(dest_folder=DEST_FOLDER, **kwargs)
+        super().__init__(**kwargs)
         self.file_name = file_data.split("#")[0]
         self.file_size = int(file_data.split("#")[1])
         Thread.__init__(self)

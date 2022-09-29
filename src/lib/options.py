@@ -57,6 +57,8 @@ class ClientOptions(ExecutionOptions):
 
 
 class UploadOptions(ClientOptions):
+    DEFAULT_SRC_FOLDER = "files/source"
+
     def __init__(self, arguments):
         super().__init__(arguments)
 
@@ -69,10 +71,16 @@ class UploadOptions(ClientOptions):
             if "--src" in self.arguments
             else -1
         )
-        self.src = self.arguments[self.src_index + 1] if self.src_index > -1 else None
+        self.src = (
+            self.arguments[self.src_index + 1]
+            if self.src_index > -1
+            else self.DEFAULT_SRC_FOLDER
+        )
 
 
 class DownloadOptions(ClientOptions):
+    DEFAULT_DEST_FOLDER = "files/downloaded"
+
     def __init__(self, arguments):
         super().__init__(arguments)
 
@@ -82,12 +90,18 @@ class DownloadOptions(ClientOptions):
             self.arguments.index("-d")
             if "-d" in self.arguments
             else self.arguments.index("--dst")
+            if "--dst" in self.arguments
+            else -1
         )
-        self.dst = self.arguments[self.dst_index + 1] if self.dst_index > -1 else None
+        self.dst = (
+            self.arguments[self.dst_index + 1]
+            if self.dst_index > -1
+            else self.DEFAULT_DEST_FOLDER
+        )
 
 
 class ServerOptions(ExecutionOptions):
-    DEFAULT_STORAGE = "storage"
+    DEFAULT_STORAGE = "files/uploaded"
 
     def __init__(self, arguments):
         super().__init__(arguments)
@@ -102,5 +116,7 @@ class ServerOptions(ExecutionOptions):
             else -1
         )
         self.storage = (
-            self.arguments[self.storage_index + 1] if self.storage_index > -1 else None
+            self.arguments[self.storage_index + 1]
+            if self.storage_index > -1
+            else self.DEFAULT_STORAGE
         )

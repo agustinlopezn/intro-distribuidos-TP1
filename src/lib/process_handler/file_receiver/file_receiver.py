@@ -30,6 +30,7 @@ class FileReceiver(FileHandler):
                 data = self.socket.receive_data()
                 f.write(data)
                 bytes_received += len(data)
-                print(f"Progress: {bytes_received/self.file_size * 100:.0f}%")
-            print("")
+                self.logger.info(
+                    f"Progress: {bytes_received/self.file_size * 100:.0f}%"
+                )
             return bytes_received
