@@ -10,3 +10,19 @@ class OperationCodes:
     ERROR = 6
     END = 7
     NSQ_ACK = 8
+
+    OPERATION_NAMES = [
+        "DOWNLOAD",
+        "UPLOAD",
+        "SV_INTRODUCTION",
+        "FILE_INFORMATION",
+        "DATA",
+        "ACK",
+        "ERROR",
+        "END",
+        "NSQ_ACK"
+    ]
+
+    @classmethod
+    def op_name(cls, op_code):
+        return cls.OPERATION_NAMES[op_code]

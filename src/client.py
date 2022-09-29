@@ -12,7 +12,6 @@ from src.lib.protocol_handler import OperationCodes
 
 HOST = "127.0.0.1"
 CLIENT_PORT = 5000
-BUFF_SIZE = 1024
 
 
 class Client:

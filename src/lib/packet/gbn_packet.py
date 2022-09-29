@@ -7,13 +7,20 @@ import sys
 
 
 class GBNPacket(Packet):
-    MAX_PAYLOAD_SIZE = 1022
+    MAX_PAYLOAD_SIZE = 1024
     HEADER_SIZE = 5
     MAX_PACKET_SIZE = HEADER_SIZE + MAX_PAYLOAD_SIZE
 
     @classmethod
+    def determine_seq_number(self, bytes_seq_number):
+        seq_number = int.from_bytes(bytes_seq_number, byteorder="big", signed=False)
+        seq_number = socket.ntohl(seq_number)
+        seq_number = -1 if seq_number == 2 ** 32 - 1 else seq_number
+        return seq_number
+
+    @classmethod
     def generate_packet(cls, op_code, seq_number, data):
-        seq_number = socket.htonl(seq_number) if seq_number >= 0 else 2 ** 32 - 1
+        seq_number = socket.htonl(seq_number) if seq_number >= 0 else socket.htonl(2 ** 32 - 1)
         bytes_seq_number = seq_number.to_bytes(4, byteorder="big")
         bytes = bytearray(cls.HEADER_SIZE + len(data))
         bytes[0] = op_code

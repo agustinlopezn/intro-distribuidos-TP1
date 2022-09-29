@@ -21,11 +21,11 @@ class SaWSocket(CustomSocket):
         seq_number = int.from_bytes(bytes_seq_number, byteorder="big", signed=False)
         seq_number = socket.ntohl(seq_number)
         self.logger.debug(
-            f"Sending packet with op_code {packet[0]} and seq_number {seq_number} from port {self.port}"
+            f"Sending packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number} from port {self.port}"
         )
         if drop_packet():
             self.logger.debug(
-                f"Dropping packet with op_code {packet[0]} and seq_number {seq_number}"
+                f"Dropping packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number}"
             )
             return
         self.socket.sendto(packet, self.opposite_address)
@@ -119,7 +119,7 @@ class SaWSocket(CustomSocket):
             data, address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
             op_code, seq_number, data = SaWPacket.parse_packet(data)
             self.logger.debug(
-                f"[DATA] Received packet from port {address[1]} with seq_number {seq_number} and op_code {op_code}"
+                f"[DATA] Received packet from port {address[1]} with seq_number {seq_number} and op_code {OperationCodes.op_name(op_code)}"
             )
             if op_code == OperationCodes.DATA and self.valid_opposite_address(address):
                 if self.valid_seq_number(seq_number):
@@ -128,7 +128,7 @@ class SaWSocket(CustomSocket):
                     return data
                 else:  # duplicate packet, should discard and send inverted ack
                     self.logger.warning(
-                        f"Received duplicate packet with seq_number {seq_number} and op_code {op_code}"
+                        f"Received duplicate packet with seq_number {seq_number} and op_code {OperationCodes.op_name(op_code)}"
                     )
                     self.send_ack(invert_ack=True)
                     # self.update_sequence_number()

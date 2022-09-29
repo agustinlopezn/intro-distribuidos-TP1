@@ -11,7 +11,7 @@ def drop_packet():
 
 
 class GBNSocket(CustomSocket):
-    RWND = 2
+    RWND = 20
     MAX_ATTEMPS = 5
 
     def __init__(self, **kwargs):
@@ -19,15 +19,19 @@ class GBNSocket(CustomSocket):
         self.seq_number = -1
 
     def _send(self, packet):
+        seq_number = GBNPacket.determine_seq_number(packet[1:5])
         self.logger.debug(
-            f"Sending packet with op_code {packet[0]} and seq_number {packet[1]} from port {self.port}"
+            f"Sending packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number} from port {self.port}"
         )
         if drop_packet():
             self.logger.debug(
-                f"Dropping packet with op_code {packet[0]} and seq_number {packet[1]}"
+                f"Dropping packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number}"
             )
             return
-        self.socket.sendto(packet, self.opposite_address)
+        try:
+            self.socket.sendto(packet, self.opposite_address)
+        except PermissionError as e:
+            self.logger.warning(f"Dropping packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number}")
 
     def generate_packet(self, op_code, data):
         packet = GBNPacket.generate_packet(
@@ -96,7 +100,7 @@ class GBNSocket(CustomSocket):
             data, address = self.socket.recvfrom(GBNPacket.MAX_PACKET_SIZE)
             op_code, seq_number, data = GBNPacket.parse_packet(data)
             self.logger.debug(
-                f"[DATA] Received packet from port {address[1]} with seq_number {seq_number} and op_code {op_code}"
+                f"[DATA] Received packet from port {address[1]} with seq_number {seq_number} and op_code {OperationCodes.op_name(op_code)}"
             )
             if op_code == OperationCodes.DATA:
                 if self.consecutive_seq_number(seq_number):

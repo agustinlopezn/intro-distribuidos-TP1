@@ -5,7 +5,7 @@ from src.lib.logger import Logger
 
 
 class FileHandler:
-    CHUNK_SIZE = 2048
+    CHUNK_SIZE = 65536
 
     def __init__(self, opposite_address, logger, host="", port=0):
         super().__init__()
