@@ -1,24 +1,28 @@
 from random import random
 from threading import Thread
 import time
-from src.lib.protocol_handler import OperationCodes
+from src.lib.operation_codes import OperationCodes
 
-DELAY_PROBABILITY = 0
-DROP_PROBABILITY = 0
-DUPLICATION_PROBABILITY = 0.1
+DELAY_PROBABILITY = 0.1
+DROP_PROBABILITY = 0.1
+DUPLICATION_PROBABILITY = 0
 
 
 class Delayer(Thread):
     DELAY_TIME = 0.5
 
-    def __init__(self, function, packet):
+    def __init__(self, function, packet, logger):
         super().__init__()
         self.function = function
         self.packet = packet
+        self.logger = logger
 
     def run(self):
-        time.sleep(self.DELAY_TIME)
-        self.function(self.packet)
+        try:
+            time.sleep(self.DELAY_TIME)
+            self.function(self.packet)
+        except OSError:
+            self.logger.warning("Delayer not resending packet because the socket is closed")
 
 
 class Dropper:
@@ -44,7 +48,7 @@ class Saboteur:
         op_code = packet[0]
         seq_number = self.packet_type.determine_seq_number(packet[1:5])
         if random() < DELAY_PROBABILITY:
-            Delayer(self.send_function, packet).start()
+            Delayer(self.send_function, packet, self.logger).start()
             self.logger.warning(
                 f"Packet with op_code {OperationCodes.op_name(op_code)} and seq_number {seq_number} was delayed"
             )
@@ -63,9 +67,10 @@ class Saboteur:
             return True
         return False
 
+
 class NullSaboteur:
     def __init__(self, **kwargs):
         pass
-    
+
     def sabotage_packet(self, packet):
         return False

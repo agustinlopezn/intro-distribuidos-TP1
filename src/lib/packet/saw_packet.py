@@ -1,9 +1,6 @@
 from .packet import Packet
-from src.lib.protocol_handler import OperationCodes
-
-
+from src.lib.operation_codes import OperationCodes
 import socket
-import sys
 
 
 class SaWPacket(Packet):
@@ -13,33 +10,32 @@ class SaWPacket(Packet):
 
     @classmethod
     def determine_seq_number(self, bytes_seq_number):
-        return int(bytes_seq_number[0]) # esto es horrible, no tiene sentido
+        return int(bytes_seq_number[0])  # esto es horrible, no tiene sentido
 
     @classmethod
     def generate_packet(cls, op_code, seq_number, data):
+        bytes = bytearray(cls.HEADER_SIZE + len(data))
         bytes[0] = op_code
         bytes[1] = seq_number  # need a more generic name
-        bytes[1:] = data
+        bytes[cls.HEADER_SIZE:] = data
         return bytes
 
-    @staticmethod
-    def parse_packet(packet):
+    @classmethod
+    def parse_packet(cls, packet):
         op_code = packet[0]
-        bytes_seq_number = packet[1:5]
-        seq_number = int.from_bytes(bytes_seq_number, byteorder="big", signed=False)
-        seq_number = socket.ntohl(seq_number)
-        data = packet[5:]
+        seq_number = packet[1]
+        data = packet[cls.HEADER_SIZE:]
         return op_code, seq_number, data
 
-    @staticmethod
-    def create_server_information(port):
-        return SaWPacket.generate_packet(
+    @classmethod
+    def create_server_information(cls, port):
+        return cls.generate_packet(
             OperationCodes.SV_INTRODUCTION, 0, 0, str(port).encode()
         )
 
-    @staticmethod
-    def get_packet_data(packet):
-        return packet[5:]
+    @classmethod
+    def get_packet_data(cls, packet):
+        return packet[cls.HEADER_SIZE:]
 
     @staticmethod
     def get_op_code(data):

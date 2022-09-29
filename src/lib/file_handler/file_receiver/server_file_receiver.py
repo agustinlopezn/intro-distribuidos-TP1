@@ -1,7 +1,7 @@
 from threading import Thread
-from src.lib.process_handler.file_receiver.file_receiver import FileReceiver
-from src.lib.process_handler.file_sender.file_sender import FileSender
-from src.lib.protocol_handler import OperationCodes
+from src.lib.file_handler.file_receiver.file_receiver import FileReceiver
+from src.lib.file_handler.file_sender.file_sender import FileSender
+from src.lib.operation_codes import OperationCodes
 
 
 class ServerFileReceiver(FileReceiver, Thread):

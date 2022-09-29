@@ -12,3 +12,4 @@ El puerto del cliente se HARDCODEA para poder simular pérdida de paquetes con i
 No es necesario que el seq_number de GBN sea de 4 bytes xq se reinicia cada vez que envía un nuevo chunk. Mientras se cumpla:
    techo(CHUNK_SIZE / PACKET_SIZE) < 255, un byte debería alcanzar
    
+Falta descartar archivos que excedan el tamaño máximo (4 GB en principio)

@@ -3,17 +3,10 @@ from socket import *
 from src.lib.accepter import Accepter
 from src.lib.logger import Logger
 from src.lib.options import ServerOptions
-from src.lib.packet.gbn_packet import GBNPacket
-from src.lib.packet.saw_packet import SaWPacket
-from src.lib.process_handler.file_sender.server_file_sender import ServerFileSender
-from src.lib.process_handler.file_receiver.server_file_receiver import (
-    ServerFileReceiver,
-)
-from src.lib.protocol_handler import OperationCodes
-from src.lib.custom_socket.gbn_socket import GBNSocket
-from src.lib.custom_socket.saw_socket import SaWSocket
+from src.lib.file_handler.file_sender.server_file_sender import ServerFileSender
+from src.lib.file_handler.file_receiver.server_file_receiver import ServerFileReceiver
+from src.lib.operation_codes import OperationCodes
 from src.lib.thread_cleaner import ThreadCleaner
-from threading import Timer
 from sys import argv
 
 
@@ -22,37 +15,48 @@ class Server:
         self.threads = {}
 
     def start_server(self):
-        options = ServerOptions(argv[1:])
-        if options.show_help:
+        self.options = ServerOptions(argv[1:])
+        if self.options.show_help:
             print("Usage: python3 start-server.py [-h] [-v] [-q] [-H host] [-p port]")
             return
-        logger = Logger("server", options.verbose, options.quiet)
-        accepter = Accepter(host=options.host, port=options.port, logger=logger)
-        thread_cleaner = ThreadCleaner(self.threads)
-        thread_cleaner.start()
+        self.prepare_execution()
         while True:
-            op_code, client_address, file_data = accepter.accept()
+            op_code, client_address, file_data = self.accepter.accept()
             if self.client_is_active(client_address):
-                logger.error(f"Client {client_address} is already connected")
+                self.logger.error(f"Client {client_address} is already connected")
                 continue
             if op_code == OperationCodes.DOWNLOAD:
-                file_sender = ServerFileSender(
-                    file_data,
-                    src_folder=options.storage,
-                    opposite_address=client_address,
-                    logger=logger,
-                )
-                file_sender.handle_send_process()
-                self.threads[client_address] = file_sender
+                self.handle_download(file_data, client_address)
             elif op_code == OperationCodes.UPLOAD:
-                file_receiver = ServerFileReceiver(
-                    file_data,
-                    dest_folder=options.storage,
-                    opposite_address=client_address,
-                    logger=logger,
-                )
-                file_receiver.handle_receive_process()
-                self.threads[client_address] = file_receiver
+                self.handle_upload(file_data, client_address)
+
+    def prepare_execution(self):
+        self.logger = Logger("server", self.options.verbose, self.options.quiet)
+        self.accepter = Accepter(
+            host=self.options.host, port=self.options.port, logger=self.logger
+        )
+        self.thread_cleaner = ThreadCleaner(self.threads)
+        self.thread_cleaner.start()
+
+    def handle_download(self, file_data, client_address):
+        file_sender = ServerFileSender(
+                file_data,
+                src_folder=self.options.storage,
+                opposite_address=client_address,
+                logger=self.logger,
+            )
+        file_sender.handle_send_process()
+        self.threads[client_address] = file_sender
+
+    def handle_upload(self, file_data, client_address):
+        file_receiver = ServerFileReceiver(
+            file_data,
+            dest_folder=self.options.storage,
+            opposite_address=client_address,
+            logger=self.logger,
+        )
+        file_receiver.handle_receive_process()
+        self.threads[client_address] = file_receiver
 
     def client_is_active(self, client_address):
         # just in case that the cleaner hasn't run yet, checks that the thread is also alive

@@ -1,7 +1,7 @@
 import os
 from threading import Thread
 from src.lib.custom_socket.saw_socket import SaWSocket
-from src.lib.process_handler.file_handler import FileHandler
+from src.lib.file_handler.file_handler import FileHandler
 
 
 class FileReceiver(FileHandler):
@@ -37,6 +37,8 @@ class FileReceiver(FileHandler):
                 return bytes_received
         except Exception as e:
             if bytes_received == self.file_size:
-                self.logger.warning(f"File {file_name} received successfully but something went wrong at the end")
+                self.logger.warning(
+                    f"File {file_name} received successfully but something went wrong at the end"
+                )
             else:
                 self.logger.error(f"File {file_name} received with errors: {e}")

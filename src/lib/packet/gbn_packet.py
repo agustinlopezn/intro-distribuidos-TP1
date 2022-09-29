@@ -1,5 +1,5 @@
 from .packet import Packet
-from src.lib.protocol_handler import OperationCodes
+from src.lib.operation_codes import OperationCodes
 
 
 import socket
@@ -20,7 +20,9 @@ class GBNPacket(Packet):
 
     @classmethod
     def generate_packet(cls, op_code, seq_number, data):
-        seq_number = socket.htonl(seq_number) if seq_number >= 0 else socket.htonl(2 ** 32 - 1)
+        seq_number = (
+            socket.htonl(seq_number) if seq_number >= 0 else socket.htonl(2 ** 32 - 1)
+        )
         bytes_seq_number = seq_number.to_bytes(4, byteorder="big")
         bytes = bytearray(cls.HEADER_SIZE + len(data))
         bytes[0] = op_code
@@ -44,9 +46,9 @@ class GBNPacket(Packet):
             OperationCodes.SV_INTRODUCTION, 0, 0, str(port).encode()
         )
 
-    @staticmethod
-    def get_packet_data(packet):
-        return packet[5:]
+    @classmethod
+    def get_packet_data(cls, packet):
+        return packet[cls.HEADER_SIZE:]
 
     @classmethod
     def get_op_code(cls, data):

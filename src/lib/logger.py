@@ -19,7 +19,7 @@ class Logger(object):
             return logging.DEBUG
         if is_quiet:
             return logging.ERROR
-        return logging.WARNING
+        return logging.INFO
 
     def debug(self, msg):
         self.logger.debug(msg)

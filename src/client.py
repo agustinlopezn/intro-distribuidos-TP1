@@ -4,11 +4,11 @@ from src.lib.logger import Logger
 
 from src.lib.custom_socket.saw_socket import SaWSocket
 from src.lib.options import DownloadOptions, UploadOptions
-from src.lib.process_handler.file_sender.client_file_sender import ClientFileSender
-from src.lib.process_handler.file_receiver.client_file_receiver import (
+from src.lib.file_handler.file_sender.client_file_sender import ClientFileSender
+from src.lib.file_handler.file_receiver.client_file_receiver import (
     ClientFileReceiver,
 )
-from src.lib.protocol_handler import OperationCodes
+from src.lib.operation_codes import OperationCodes
 
 HOST = "127.0.0.1"
 CLIENT_PORT = 5000
@@ -22,7 +22,7 @@ class Client:
         server_address = (options.host, options.port)
         ClientFileSender(
             options.file_name,
-            src_folder = options.src,
+            src_folder=options.src,
             logger=logger,
             opposite_address=server_address,
             host=HOST,

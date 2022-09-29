@@ -2,7 +2,7 @@ from random import random
 from src.lib.saboteur import Saboteur
 from src.lib.packet.gbn_packet import GBNPacket
 from .custom_socket import CustomSocket, timeout
-from src.lib.protocol_handler import OperationCodes
+from src.lib.operation_codes import OperationCodes
 
 DELAY_PROBABILITY = 0.1
 

@@ -1,7 +1,7 @@
 from threading import Thread
 from src.lib.custom_socket.saw_socket import SaWSocket
-from src.lib.process_handler.file_receiver.file_receiver import FileReceiver
-from src.lib.protocol_handler import OperationCodes
+from src.lib.file_handler.file_receiver.file_receiver import FileReceiver
+from src.lib.operation_codes import OperationCodes
 
 DEST_FOLDER = "files/downloaded/"
 

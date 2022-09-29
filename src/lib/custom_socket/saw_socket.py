@@ -1,7 +1,7 @@
 from random import random
 from src.lib.packet.saw_packet import SaWPacket
 from .custom_socket import CustomSocket, timeout
-from src.lib.protocol_handler import OperationCodes
+from src.lib.operation_codes import OperationCodes
 import socket
 
 DROP_PROBABILITY = 0.0
@@ -16,20 +16,6 @@ class SaWSocket(CustomSocket):
         self.seq_number = 0
         self.packet_type = SaWPacket
         super().__init__(**kwargs)
-
-    def _send(self, packet):
-        bytes_seq_number = packet[1:5]
-        seq_number = int.from_bytes(bytes_seq_number, byteorder="big", signed=False)
-        seq_number = socket.ntohl(seq_number)
-        self.logger.debug(
-            f"Sending packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number} from port {self.port}"
-        )
-        if drop_packet():
-            self.logger.debug(
-                f"Dropping packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number}"
-            )
-            return
-        self.socket.sendto(packet, self.opposite_address)
 
     def generate_packet(self, op_code, data):
         packet = SaWPacket.generate_packet(
@@ -78,8 +64,8 @@ class SaWSocket(CustomSocket):
             )
 
     def send_ack(self, invert_ack=False):
-        # ack_number = int(not self.seq_number) if invert_ack else self.seq_number
-        ack_number = self.seq_number - 1 if invert_ack else self.seq_number
+        ack_number = int(not self.seq_number) if invert_ack else self.seq_number
+        # ack_number = self.seq_number - 1 if invert_ack else self.seq_number
         packet = SaWPacket.generate_packet(
             op_code=OperationCodes.ACK, seq_number=ack_number, data="".encode()
         )
@@ -111,8 +97,8 @@ class SaWSocket(CustomSocket):
                 return data
 
     def update_sequence_number(self):
-        # self.seq_number = int(not self.seq_number)
-        self.seq_number += 1  # this way is better for debugging
+        self.seq_number = int(not self.seq_number)
+        # self.seq_number += 1  # this way is better for debugging
 
     def receive_data(self):
         while True:
@@ -132,7 +118,6 @@ class SaWSocket(CustomSocket):
                         f"Received duplicate packet with seq_number {seq_number} and op_code {OperationCodes.op_name(op_code)}"
                     )
                     self.send_ack(invert_ack=True)
-                    # self.update_sequence_number()
 
     def receive_sv_information(self):
         while True:

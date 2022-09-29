@@ -1,5 +1,5 @@
 from socket import socket, AF_INET, SOCK_DGRAM, timeout
-from src.lib.protocol_handler import OperationCodes
+from src.lib.operation_codes import OperationCodes
 from src.lib.saboteur import Saboteur
 from src.lib.logger import Logger
 
@@ -26,7 +26,9 @@ class CustomSocket:
         try:
             self.socket.sendto(packet, self.opposite_address)
         except PermissionError as e:
-            self.logger.warning(f"Dropping packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number}")
+            self.logger.warning(
+                f"Dropping packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number}"
+            )
 
     def set_timeout(self, timeout):
         self.socket.settimeout(timeout)
