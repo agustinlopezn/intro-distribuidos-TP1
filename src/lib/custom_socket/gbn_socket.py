@@ -7,8 +7,8 @@ from src.lib.operation_codes import OperationCodes
 class GBNSocket(CustomSocket):
     RWND = 20
     MAX_ATTEMPS = 5
-    TIMEOUT = 2
-    PROCESS_TIMEOUT = 10  # Capaz se usa el timeout del custom socket
+    TIMEOUT = 10 / 1000
+    PROCESS_TIMEOUT = 200 / 1000  # Capaz se usa el timeout del custom socket
 
     def __init__(self, **kwargs):
         self.seq_number = -1
@@ -24,25 +24,6 @@ class GBNSocket(CustomSocket):
     def send_nsq_ack(self):
         packet = self.generate_packet(op_code=OperationCodes.NSQ_ACK, data="".encode())
         self._send(packet)
-
-    def serialize_information(self, port, file_size):
-        if not file_size:
-            return str(port).encode()
-        if not port:
-            return str(file_size).encode()
-        return f"{port}#{file_size}".encode()
-
-    def send_sv_information(self, file_size=None):
-        self.logger.debug(
-            f"Sending server information: port = {self.port}, file_size = {file_size}"
-        )
-        data = self.serialize_information(self.port, file_size)
-        try:
-            self._send_and_wait(OperationCodes.SV_INTRODUCTION, data)
-        except:
-            self.logger.debug(
-                "Server information not acknowledged. Starting process anyway"
-            )
 
     def send_ack(self):
         packet = GBNPacket.generate_packet(
@@ -81,7 +62,7 @@ class GBNSocket(CustomSocket):
         return b"".join(packages)
 
     def send_end(self):
-        self._send_and_wait(OperationCodes.END, "".encode())
+        self._send_and_wait(OperationCodes.END, "".encode(), OperationCodes.NSQ_ACK)
 
     def send_data(self, data):
         self.last_packet_sent = -1
@@ -171,19 +152,6 @@ class GBNSocket(CustomSocket):
         return self.valid_opposite_address(address) and self.valid_seq_number(
             seq_number
         )
-
-    def _send_and_wait(self, op_code, data):
-        attemps = self.MAX_ATTEMPS
-        packet = self.generate_packet(op_code, data)
-        while attemps > 0:
-            try:
-                self._send(packet)
-                self.receive_ack()
-                return
-            except timeout:
-                attemps -= 1
-                self.logger.warning("TIMEOUT! Retrying...")
-        raise Exception("Connection timed out")
 
     def close_connection(self):
         self.socket.close()

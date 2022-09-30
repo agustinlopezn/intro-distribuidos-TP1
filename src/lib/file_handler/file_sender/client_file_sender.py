@@ -20,5 +20,3 @@ class ClientFileSender(FileSender):
             f"{self.file_size} bytes will be sent to port {self.socket.port}"
         )
         self.socket.send_up_request(self.file_name, self.file_size)
-        self.socket.receive_sv_information()
-        self.socket.send_nsq_ack()

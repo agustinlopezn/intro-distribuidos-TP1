@@ -30,20 +30,61 @@ class CustomSocket:
                 f"Dropping packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number}"
             )
 
+    def receive_response(self, expected_op_code):
+        if expected_op_code is None:
+            raise Exception("Expected op_code must be specified")
+        if expected_op_code == OperationCodes.SV_INTRODUCTION:
+            return self.receive_sv_information()
+        if (
+            expected_op_code == OperationCodes.NSQ_ACK
+            or expected_op_code == OperationCodes.ACK
+        ):
+            return self.receive_ack()
+
+    def _send_and_wait(self, op_code, data, expected_op_code=None):
+        packet = self.generate_packet(op_code, data)
+        for i in range(self.MAX_ATTEMPS):
+            try:
+                self._send(packet)
+                data = self.receive_response(expected_op_code=expected_op_code)
+                return data
+            except timeout:
+                self.logger.warning("TIMEOUT! Retrying...")
+        raise Exception("Connection timed out")
+
     #############################
     #   HANDSHAKE METHODS     #
     #############################
 
+    def serialize_information(self, port=None, file_size=None):
+        if not file_size:
+            return str(port).encode()
+        if not port:
+            return str(file_size).encode()
+        return f"{port}#{file_size}".encode()
+
+    def send_sv_information(self, file_size=None):
+        self.logger.debug(
+            f"Sending server information: port = {self.port}, file_size = {file_size}"
+        )
+        data = self.serialize_information(self.port, file_size)
+        try:
+            self._send_and_wait(
+                OperationCodes.SV_INTRODUCTION, data, OperationCodes.NSQ_ACK
+            )
+        except:
+            self.logger.debug(
+                "Server information not acknowledged. Starting process anyway"
+            )
+
     def receive_sv_information(self):
-        self.socket.settimeout(None)
         while True:
             data, address = self.socket.recvfrom(self.packet_type.MAX_PACKET_SIZE)
-            op_code, seq_number, data = self.packet_type.parse_packet(data)
+            op_code, seq_number, parsed_data = self.packet_type.parse_packet(data)
             if op_code == OperationCodes.SV_INTRODUCTION:
-                self.logger.debug(f"Received server information: {data}")
+                self.logger.debug(f"Received server information: {parsed_data}")
                 self.opposite_address = address
-                self.socket.settimeout(self.TIMEOUT)
-                return data
+                return parsed_data
 
     def receive_first_connection(self):
         msg, client_address = self.socket.recvfrom(self.packet_type.MAX_PACKET_SIZE)
@@ -51,6 +92,7 @@ class CustomSocket:
         self.logger.debug(
             f"Receiving first connection from client at port: {client_address[1]}"
         )
+
         if op_code not in (OperationCodes.DOWNLOAD, OperationCodes.UPLOAD):
             raise Exception("Invalid operation code")
         return op_code, client_address, self.packet_type.get_packet_data(msg).decode()
@@ -59,18 +101,20 @@ class CustomSocket:
         self.logger.debug(
             f"Sending download request with port {self.port}, file_name {file_name}"
         )
-        packet = self.generate_packet(
-            op_code=OperationCodes.DOWNLOAD, data=file_name.encode()
+        encoded_data = self.serialize_information(file_name)
+        response_data = self._send_and_wait(
+            OperationCodes.DOWNLOAD, encoded_data, OperationCodes.SV_INTRODUCTION
         )
-        return self._send(packet)
+        self.send_nsq_ack()
+        return response_data
 
     def send_up_request(self, file_name, file_size=None):
         self.logger.debug(
             f"Sending upload request with port {self.port}, file_name {file_name} and file_size {file_size}"
         )
         data = self.serialize_information(file_name, file_size)
-        packet = self.generate_packet(op_code=OperationCodes.UPLOAD, data=data)
-        self._send(packet)
+        self._send_and_wait(OperationCodes.UPLOAD, data, OperationCodes.SV_INTRODUCTION)
+        self.send_nsq_ack()
 
     #############################
 

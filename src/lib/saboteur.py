@@ -9,7 +9,7 @@ DUPLICATION_PROBABILITY = 0
 
 
 class Delayer(Thread):
-    DELAY_TIME = 0.5
+    DELAY_TIME = 5 / 1000
 
     def __init__(self, function, packet, logger):
         super().__init__()
@@ -22,7 +22,9 @@ class Delayer(Thread):
             time.sleep(self.DELAY_TIME)
             self.function(self.packet)
         except OSError:
-            self.logger.warning("Delayer not resending packet because the socket is closed")
+            self.logger.warning(
+                "Delayer not resending packet because the socket is closed"
+            )
 
 
 class Dropper:

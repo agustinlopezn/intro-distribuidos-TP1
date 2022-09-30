@@ -1,3 +1,4 @@
+from re import S
 from src.lib.packet.saw_packet import SaWPacket
 from .custom_socket import CustomSocket, timeout
 from src.lib.operation_codes import OperationCodes
@@ -5,7 +6,7 @@ from src.lib.operation_codes import OperationCodes
 
 class SaWSocket(CustomSocket):
     MAX_ATTEMPS = 5
-    TIMEOUT = 2
+    TIMEOUT = 10 / 1000
 
     def __init__(self, **kwargs):
         self.seq_number = 0
@@ -22,28 +23,9 @@ class SaWSocket(CustomSocket):
         packet = self.generate_packet(op_code=OperationCodes.NSQ_ACK, data="".encode())
         self._send(packet)
 
-    def serialize_information(self, port, file_size):
-        if not file_size:
-            return str(port).encode()
-        if not port:
-            return str(file_size).encode()
-        return f"{port}#{file_size}".encode()
-
-    def send_sv_information(self, file_size=None):
-        self.logger.debug(
-            f"Sending server information: port = {self.port}, file_size = {file_size}"
-        )
-        data = self.serialize_information(self.port, file_size)
-        try:
-            self._send_and_wait(OperationCodes.SV_INTRODUCTION, data)
-        except:
-            self.logger.debug(
-                "Server information not acknowledged. Starting process anyway"
-            )
-
     def send_ack(self, invert_ack=False):
-        ack_number = int(not self.seq_number) if invert_ack else self.seq_number
-        # ack_number = self.seq_number - 1 if invert_ack else self.seq_number
+        # ack_number = int(not self.seq_number) if invert_ack else self.seq_number
+        ack_number = self.seq_number - 1 if invert_ack else self.seq_number
         packet = SaWPacket.generate_packet(
             op_code=OperationCodes.ACK, seq_number=ack_number, data="".encode()
         )
@@ -55,7 +37,7 @@ class SaWSocket(CustomSocket):
         self.logger.debug(f"Sending {len(data)} bytes")
         for head in range(0, len(data), max_packet_size):
             payload = data[head : head + max_packet_size]
-            self._send_and_wait(op_code, payload)
+            self._send_and_wait(op_code, payload, OperationCodes.ACK)
             self.logger.debug(f"{len(payload)} bytes sent")
 
     def valid_seq_number(self, received_seq_number):
@@ -75,8 +57,8 @@ class SaWSocket(CustomSocket):
                 return data
 
     def update_sequence_number(self):
-        self.seq_number = int(not self.seq_number)
-        # self.seq_number += 1  # this way is better for debugging
+        # self.seq_number = int(not self.seq_number)
+        self.seq_number += 1  # this way is better for debugging
 
     def receive_data(self):
         while True:
@@ -104,17 +86,6 @@ class SaWSocket(CustomSocket):
         return self.valid_opposite_address(address) and self.valid_seq_number(
             seq_number
         )
-
-    def _send_and_wait(self, op_code, data):
-        packet = self.generate_packet(op_code, data)
-        for i in range(self.MAX_ATTEMPS):
-            try:
-                self._send(packet)
-                data = self.receive_ack()
-                return data
-            except timeout:
-                self.logger.warning("TIMEOUT! Retrying...")
-        raise Exception("Connection timed out")
 
     def close_connection(self):
         self.socket.close()

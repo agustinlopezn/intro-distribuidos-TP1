@@ -3,6 +3,11 @@
 A corregir:
   - Contemplar que el archivo no exista
   - En Upload, a veces, se manda todo el archivo, pero el cliente no termina.
+  - Si el server no esta levantado y el cliente quiere hacer una accion -> no pasa nada. manda el up,down y se queda esperando.
+  - El tiempo del server tiene que ir al thread (sino es instantaneo)
+  - El server no imprime el NO_SQ_ACK
+  - Si se muere el cliente el server no se entera
+  - El server no imprime el progreso por el CHUNK_SIZE grande, capaz moverlo al socket?
 
 GBN:
   - Cada vez que se termina de mandar un chunk, se manda un END. El problema es que el ACK de ese END se manda una sola vez. 
@@ -14,6 +19,7 @@ No es necesario que el seq_number de GBN sea de 4 bytes xq se reinicia cada vez 
    
 Falta descartar archivos que excedan el tamaño máximo (4 GB en principio)
 
-Si el server no esta levantado y el cliente quiere hacer una accion -> no pasa nada. manda el up,down y se queda esperando.
 
-El tiempo del server tiene que ir al thread (sino es instantaneo)
+
+Hipotesis: 
+- En el server no hay ningun archivo mas alla de los subidos por clientes (No es necesario chequear el tamaño del archivo cuando un cliente descarga)

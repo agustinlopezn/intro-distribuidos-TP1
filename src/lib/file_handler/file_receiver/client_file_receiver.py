@@ -18,11 +18,8 @@ class ClientFileReceiver(FileReceiver):
         self.socket.close_connection()
 
     def handle_process_start(self):
-        self.socket.send_dl_request(self.file_name)
-        data = self.socket.receive_sv_information()
+        data = self.socket.send_dl_request(self.file_name)
+        # Check size limits before sending ACK
         port, file_size = data.decode().split("#")
         port, self.file_size = int(port), int(file_size)
         self.logger.info(f"{self.file_size} bytes will be received from port {port}")
-        # Check size limits before sending ACK
-        self.socket.send_nsq_ack()
-
