@@ -4,7 +4,7 @@ from src.lib.custom_socket.saw_socket import SaWSocket
 
 class Accepter:
     def __init__(self, **kwargs):
-        self.socket = SaWSocket(opposite_address=None, **kwargs)
+        self.socket = GBNSocket(opposite_address=None, **kwargs)
         self.socket.set_timeout(None)
 
     def accept(self):

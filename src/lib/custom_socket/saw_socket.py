@@ -9,24 +9,12 @@ class SaWSocket(CustomSocket):
     TIMEOUT = 10 / 1000
 
     def __init__(self, **kwargs):
-        self.seq_number = 0
-        self.packet_type = SaWPacket
-        super().__init__(**kwargs)
-
-    def generate_packet(self, op_code, data):
-        packet = SaWPacket.generate_packet(
-            op_code=op_code, seq_number=self.seq_number, data=data
-        )
-        return packet
-
-    def send_nsq_ack(self):
-        packet = self.generate_packet(op_code=OperationCodes.NSQ_ACK, data="".encode())
-        self._send(packet)
+        super().__init__(seq_number=0, packet_type=SaWPacket, **kwargs)
 
     def send_ack(self, invert_ack=False):
         # ack_number = int(not self.seq_number) if invert_ack else self.seq_number
         ack_number = self.seq_number - 1 if invert_ack else self.seq_number
-        packet = SaWPacket.generate_packet(
+        packet = self.packet_type.generate_packet(
             op_code=OperationCodes.ACK, seq_number=ack_number, data="".encode()
         )
         self._send(packet)
@@ -43,20 +31,7 @@ class SaWSocket(CustomSocket):
     def valid_seq_number(self, received_seq_number):
         return received_seq_number == self.seq_number
 
-    def receive_ack(self):
-        while True:
-            data, address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
-            op_code, seq_number, data = SaWPacket.parse_packet(data)
-            if op_code == OperationCodes.NSQ_ACK and self.valid_opposite_address(
-                address
-            ):
-                return data
-            if op_code == OperationCodes.ACK and self.valid_packet(address, seq_number):
-                self.logger.debug(f"Received ack with seq_number {seq_number}")
-                self.update_sequence_number()
-                return data
-
-    def update_sequence_number(self):
+    def update_seq_number(self):
         # self.seq_number = int(not self.seq_number)
         self.seq_number += 1  # this way is better for debugging
 
@@ -71,7 +46,7 @@ class SaWSocket(CustomSocket):
             if op_code == OperationCodes.DATA and self.valid_opposite_address(address):
                 if self.valid_seq_number(seq_number):
                     self.send_ack()
-                    self.update_sequence_number()
+                    self.update_seq_number()
                     return data
                 else:  # duplicate packet, should discard and send inverted ack
                     self.logger.warning(
@@ -79,14 +54,7 @@ class SaWSocket(CustomSocket):
                     )
                     self.send_ack(invert_ack=True)
 
-    def valid_opposite_address(self, address):
-        return address == self.opposite_address
-
     def valid_packet(self, address, seq_number):
         return self.valid_opposite_address(address) and self.valid_seq_number(
             seq_number
         )
-
-    def close_connection(self):
-        self.socket.close()
-        self.logger.info("Connection closed successfully")

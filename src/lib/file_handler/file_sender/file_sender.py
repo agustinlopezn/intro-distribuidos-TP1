@@ -33,6 +33,7 @@ class FileSender(FileHandler):
                     )
                 return
         except Exception as e:
+            print(e)
             if bytes_sent >= self.file_size - self.CHUNK_SIZE:
                 # Polémico, porque es verdad sólo para SaWSocket
                 self.logger.warning(

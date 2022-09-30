@@ -9,7 +9,7 @@ class FileHandler:
 
     def __init__(self, opposite_address, logger, host="", port=0):
         super().__init__()
-        self.socket = SaWSocket(
+        self.socket = GBNSocket(
             opposite_address=opposite_address,
             host=host,
             port=port,

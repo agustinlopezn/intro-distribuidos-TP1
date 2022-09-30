@@ -13,7 +13,7 @@ class SaWPacket(Packet):
         return int(bytes_seq_number[0])  # esto es horrible, no tiene sentido
 
     @classmethod
-    def generate_packet(cls, op_code, seq_number, data):
+    def generate_packet(cls, op_code, seq_number, data=b""):
         bytes = bytearray(cls.HEADER_SIZE + len(data))
         bytes[0] = op_code
         bytes[1] = seq_number  # need a more generic name

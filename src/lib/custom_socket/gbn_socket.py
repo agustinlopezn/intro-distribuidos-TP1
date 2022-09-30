@@ -8,22 +8,10 @@ class GBNSocket(CustomSocket):
     RWND = 20
     MAX_ATTEMPS = 5
     TIMEOUT = 10 / 1000
-    PROCESS_TIMEOUT = 200 / 1000  # Capaz se usa el timeout del custom socket
+    PROCESS_TIMEOUT = 20 / 1000  # Capaz se usa el timeout del custom socket
 
     def __init__(self, **kwargs):
-        self.seq_number = -1
-        self.packet_type = GBNPacket
-        super().__init__(**kwargs)
-
-    def generate_packet(self, op_code, data):
-        packet = GBNPacket.generate_packet(
-            op_code=op_code, seq_number=self.seq_number, data=data
-        )
-        return packet
-
-    def send_nsq_ack(self):
-        packet = self.generate_packet(op_code=OperationCodes.NSQ_ACK, data="".encode())
-        self._send(packet)
+        super().__init__(seq_number=-1, packet_type=GBNPacket, **kwargs)
 
     def send_ack(self):
         packet = GBNPacket.generate_packet(
@@ -35,7 +23,7 @@ class GBNSocket(CustomSocket):
         # seq_number must be last acked + 1
         return seq_number == self.seq_number + 1
 
-    def update_sequence_number(self):
+    def update_seq_number(self):
         self.seq_number += 1
 
     def receive_data(self):
@@ -50,7 +38,7 @@ class GBNSocket(CustomSocket):
             )
             if op_code == OperationCodes.DATA:
                 if self.consecutive_seq_number(seq_number):
-                    self.update_sequence_number()
+                    self.update_seq_number()
                     self.send_ack()
                     packages.append(data)
                 else:
@@ -84,17 +72,6 @@ class GBNSocket(CustomSocket):
         self.logger.info("All payloads were acked")
         self.send_end()
 
-    def handle_timeout(self):
-        self.logger.debug(f"Handling timeout...")
-        packets_sent_but_not_acked = self.last_packet_sent - self.last_packet_acked
-        packets_to_resend = min(packets_sent_but_not_acked, self.RWND)
-        self.logger.debug(f"Packets to resend: {packets_to_resend}")
-        starting_index = self.last_packet_acked + 1
-        ending_index = starting_index + packets_to_resend
-        for i in range(starting_index, ending_index):
-            payload = self.payloads[i]
-            self.send_packet(payload)
-
     def wait_ack(self):
         self.logger.debug(f"Waiting for ack")
         self.socket.settimeout(self.PROCESS_TIMEOUT)
@@ -117,42 +94,22 @@ class GBNSocket(CustomSocket):
                 break
             payload = self.payloads[self.last_packet_sent + 1]
             self.logger.debug(f"Sending packet {self.last_packet_sent + 1} ")
-            self.send_packet(payload)
+            self.send_data_packet(payload)
             self.last_packet_sent += 1
             packets_in_traffic += 1
 
-    def send_packet(self, payload):
-        packet = GBNPacket.generate_packet(
+    def send_data_packet(self, payload):
+        packet = self.packet_type.generate_packet(
             op_code=OperationCodes.DATA,
             seq_number=self.last_packet_sent + 1,
             data=payload,
         )
         self._send(packet)
 
-    def valid_seq_number(self, received_seq_number):
-        return received_seq_number == self.seq_number
-
-    def receive_ack(self):
-        while True:
-            data, address = self.socket.recvfrom(GBNPacket.MAX_PACKET_SIZE)
-            op_code, seq_number, data = GBNPacket.parse_packet(data)
-            if op_code == OperationCodes.NSQ_ACK and self.valid_opposite_address(
-                address
-            ):
-                return data
-            if op_code == OperationCodes.ACK and self.valid_opposite_address(address):
-                self.logger.debug(f"Received ack with seq_number {seq_number}")
-                self.update_sequence_number()
-                return data
-
-    def valid_opposite_address(self, address):
-        return address == self.opposite_address
-
     def valid_packet(self, address, seq_number):
-        return self.valid_opposite_address(address) and self.valid_seq_number(
-            seq_number
-        )
+        return self.valid_opposite_address(address)
 
     def close_connection(self):
         self.socket.close()
         self.logger.info("Connection closed successfully")
+

@@ -19,7 +19,7 @@ class GBNPacket(Packet):
         return seq_number
 
     @classmethod
-    def generate_packet(cls, op_code, seq_number, data):
+    def generate_packet(cls, op_code, seq_number, data=b""):
         seq_number = (
             socket.htonl(seq_number) if seq_number >= 0 else socket.htonl(2 ** 32 - 1)
         )

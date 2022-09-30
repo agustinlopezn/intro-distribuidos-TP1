@@ -7,14 +7,38 @@ from src.lib.logger import Logger
 class CustomSocket:
     __abstract__ = True
 
-    def __init__(self, opposite_address=None, host="", port=0, logger=None):
+    def __init__(
+        self,
+        packet_type,
+        seq_number,
+        opposite_address=None,
+        host="",
+        port=0,
+        logger=None,
+    ):
         self.opposite_address = opposite_address
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.socket.bind((host, port))
         # Bind to a random port if no port and host are specified
         self.set_timeout(self.TIMEOUT)
         self.logger = logger
+        self.packet_type = packet_type
         self.saboteur = Saboteur(self._send, self.packet_type, logger)
+        self.seq_number = seq_number
+
+    #############################
+    #      SENDING METHODS      #
+    #############################
+
+    def send_nsq_ack(self):
+        packet = self.generate_packet(op_code=OperationCodes.NSQ_ACK)
+        self._send(packet)
+
+    def generate_packet(self, op_code, data=b""):
+        packet = self.packet_type.generate_packet(
+            op_code=op_code, seq_number=self.seq_number, data=data
+        )
+        return packet
 
     def _send(self, packet):
         seq_number = self.packet_type.determine_seq_number(packet[1:5])
@@ -30,17 +54,6 @@ class CustomSocket:
                 f"Dropping packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number}"
             )
 
-    def receive_response(self, expected_op_code):
-        if expected_op_code is None:
-            raise Exception("Expected op_code must be specified")
-        if expected_op_code == OperationCodes.SV_INTRODUCTION:
-            return self.receive_sv_information()
-        if (
-            expected_op_code == OperationCodes.NSQ_ACK
-            or expected_op_code == OperationCodes.ACK
-        ):
-            return self.receive_ack()
-
     def _send_and_wait(self, op_code, data, expected_op_code=None):
         packet = self.generate_packet(op_code, data)
         for i in range(self.MAX_ATTEMPS):
@@ -53,7 +66,35 @@ class CustomSocket:
         raise Exception("Connection timed out")
 
     #############################
-    #   HANDSHAKE METHODS     #
+    #     RECEIVING METHODS     #
+    #############################
+
+    def receive_ack(self):
+        while True:
+            data, address = self.socket.recvfrom(self.packet_type.MAX_PACKET_SIZE)
+            op_code, seq_number, data = self.packet_type.parse_packet(data)
+            if op_code == OperationCodes.NSQ_ACK and self.valid_opposite_address(
+                address
+            ):
+                return data
+            if op_code == OperationCodes.ACK and self.valid_packet(address, seq_number):
+                self.logger.debug(f"Received ack with seq_number {seq_number}")
+                self.update_seq_number()
+                return data
+
+    def receive_response(self, expected_op_code):
+        if expected_op_code is None:
+            raise Exception("Expected op_code must be specified")
+        if expected_op_code == OperationCodes.SV_INTRODUCTION:
+            return self.receive_sv_information()
+        if (
+            expected_op_code == OperationCodes.NSQ_ACK
+            or expected_op_code == OperationCodes.ACK
+        ):
+            return self.receive_ack()
+
+    #############################
+    #     HANDSHAKE METHODS     #
     #############################
 
     def serialize_information(self, port=None, file_size=None):
@@ -117,16 +158,38 @@ class CustomSocket:
         self.send_nsq_ack()
 
     #############################
-
-    def set_timeout(self, timeout):
-        self.socket.settimeout(timeout)
-
-    def send_data(self, message):
-        raise NotImplementedError
-
-    def receive(self):
-        raise NotImplementedError
+    #       OTHER METHODS       #
+    #############################
 
     @property
     def port(self):
         return self.socket.getsockname()[1]
+
+    def close_connection(self):
+        self.socket.close()
+        self.logger.info("Connection closed successfully")
+
+    def valid_opposite_address(self, address):
+        return address == self.opposite_address
+
+    def set_timeout(self, timeout):
+        self.socket.settimeout(timeout)
+
+    #############################
+    #     ABSTRACT METHODS      #
+    #############################
+
+    def send_data(self, message):
+        raise NotImplementedError
+
+    def receive_data(self, message):
+        raise NotImplementedError
+
+    def send_ack(self, message):
+        raise NotImplementedError
+
+    def update_seq_number(self):
+        raise NotImplementedError
+
+    def valid_packet(self):
+        raise NotImplementedError
