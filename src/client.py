@@ -10,10 +10,6 @@ from src.lib.file_handler.file_receiver.client_file_receiver import (
 )
 from src.lib.operation_codes import OperationCodes
 
-HOST = "127.0.0.1"
-CLIENT_PORT = 6000
-
-
 class Client:
     @classmethod
     def upload(cls):
@@ -25,8 +21,6 @@ class Client:
             src_folder=options.src,
             logger=logger,
             opposite_address=server_address,
-            host=HOST,
-            port=CLIENT_PORT,
         ).handle_send_process()
 
     @classmethod
@@ -39,6 +33,4 @@ class Client:
             dest_folder=options.dst,
             logger=logger,
             opposite_address=server_address,
-            host=HOST,
-            port=CLIENT_PORT,
         ).handle_receive_process()

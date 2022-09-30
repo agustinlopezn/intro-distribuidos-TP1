@@ -1,4 +1,3 @@
-from pexpect import TIMEOUT
 from src.lib.packet.gbn_packet import GBNPacket
 from .custom_socket import CustomSocket, timeout
 from src.lib.operation_codes import OperationCodes
@@ -9,6 +8,7 @@ class GBNSocket(CustomSocket):
     MAX_ATTEMPS = 5
     TIMEOUT = 10 / 1000
     PROCESS_TIMEOUT = 20 / 1000  # Capaz se usa el timeout del custom socket
+    MAX_RECEVING_TIME = 3 # max time to wait for data, then it breaks the connection
 
     def __init__(self, **kwargs):
         super().__init__(seq_number=-1, packet_type=GBNPacket, **kwargs)
@@ -30,7 +30,7 @@ class GBNSocket(CustomSocket):
         packages = []
         self.seq_number = -1
         while True:
-            self.socket.settimeout(None)
+            self.socket.settimeout(self.MAX_RECEVING_TIME)
             data, address = self.socket.recvfrom(GBNPacket.MAX_PACKET_SIZE)
             op_code, seq_number, data = GBNPacket.parse_packet(data)
             self.logger.debug(

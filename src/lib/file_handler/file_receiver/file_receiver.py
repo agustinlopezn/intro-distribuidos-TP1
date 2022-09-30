@@ -6,11 +6,9 @@ import time
 
 
 class FileReceiver(FileHandler):
-    def __init__(self, opposite_address, dest_folder, logger, host="", port=0):
+    def __init__(self, dest_folder, **kwargs):
         self.destination_folder = dest_folder
-        super().__init__(
-            opposite_address=opposite_address, host=host, port=port, logger=logger
-        )
+        super().__init__(**kwargs)
 
     def get_valid_name(self, file_name):
         counter = 1

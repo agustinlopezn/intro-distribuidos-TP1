@@ -35,7 +35,7 @@ class Server:
         self.accepter = Accepter(
             host=self.options.host, port=self.options.port, logger=self.logger
         )
-        self.thread_cleaner = ThreadCleaner(self.threads)
+        self.thread_cleaner = ThreadCleaner(self.threads, self.logger)
         self.thread_cleaner.start()
 
     def handle_download(self, file_data, client_address):

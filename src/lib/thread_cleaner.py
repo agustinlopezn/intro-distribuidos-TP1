@@ -5,9 +5,10 @@ CYCLE_TIME = 1
 
 
 class ThreadCleaner(Thread):
-    def __init__(self, active_threads):
+    def __init__(self, active_threads, logger):
         super().__init__()
         self.active_threads = active_threads
+        self.logger = logger
 
     def run(self):
         while True:
@@ -22,3 +23,4 @@ class ThreadCleaner(Thread):
             thread = self.active_threads[client_address]
             thread.join()
             del self.active_threads[client_address]
+            self.logger.debug(f"Thread listening to {client_address} deleted")
