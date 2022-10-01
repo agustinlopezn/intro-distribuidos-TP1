@@ -15,7 +15,7 @@ class ClientFileReceiver(FileReceiver):
         self.logger.info(f"Starting file receiving process for file {self.file_name}")
         self.handle_process_start()
         self.receive_file()
-        self.socket.close_connection()
+        self.socket.close_connection(confirm_close=True)
 
     def handle_process_start(self):
         data = self.socket.send_dl_request(self.file_name)

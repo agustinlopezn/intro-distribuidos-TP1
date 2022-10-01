@@ -109,7 +109,7 @@ class GBNSocket(CustomSocket):
     def valid_packet(self, address, seq_number):
         return self.valid_opposite_address(address)
 
-    def close_connection(self):
+    def close_connection(self, confirm_close=False):
         self.socket.close()
         self.logger.info("Connection closed successfully")
 

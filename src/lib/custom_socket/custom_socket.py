@@ -165,10 +165,6 @@ class CustomSocket:
     def port(self):
         return self.socket.getsockname()[1]
 
-    def close_connection(self):
-        self.socket.close()
-        self.logger.info("Connection closed successfully")
-
     def valid_opposite_address(self, address):
         return address == self.opposite_address
 

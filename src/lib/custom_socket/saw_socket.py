@@ -58,3 +58,14 @@ class SaWSocket(CustomSocket):
         return self.valid_opposite_address(address) and self.valid_seq_number(
             seq_number
         )
+
+    def close_connection(self, confirm_close=False):
+        if confirm_close:
+            self.send_final_acks()
+        self.socket.close()
+        self.logger.info("Connection closed successfully")
+
+    def send_final_acks(self):
+        self.logger.debug("Sending final acks")
+        for _ in range(self.MAX_ATTEMPS):
+            self.send_ack()

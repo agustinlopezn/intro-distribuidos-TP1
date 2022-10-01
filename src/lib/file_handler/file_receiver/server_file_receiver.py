@@ -28,7 +28,7 @@ class ServerFileReceiver(FileReceiver, Thread):
                 f"Timeout reached while receiving, closing connection with client at port {self.socket.opposite_address[1]}"
             )
         finally:
-            self.socket.close_connection()
+            self.socket.close_connection(confirm_close=True)
 
     def _handle_receive_process(self):
         # just for polymorphism purposes
