@@ -23,9 +23,9 @@ class FileReceiver(FileHandler):
 
     def receive_file(self, showProgress=True):
         file_name = self.get_valid_name(f"{self.destination_folder}/{self.file_name}")
+        bytes_received = 0
         try:
             with open(file_name, "wb") as f:
-                bytes_received = 0
                 while bytes_received < self.file_size:
                     data = self.socket.receive_data()
                     f.write(data)

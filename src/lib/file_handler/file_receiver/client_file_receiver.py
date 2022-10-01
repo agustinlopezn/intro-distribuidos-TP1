@@ -20,7 +20,8 @@ class ClientFileReceiver(FileReceiver):
         self.socket.close_connection(confirm_close=True)
         finish_time = time()
         self.logger.info(
-            f"File {self.file_name} received in %.2f seconds" % (finish_time - start_time)
+            f"File {self.file_name} received in %.2f seconds"
+            % (finish_time - start_time)
         )
 
     def handle_process_start(self):

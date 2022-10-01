@@ -3,15 +3,26 @@ from src.lib.file_handler.file_sender.file_sender import FileSender
 from src.lib.operation_codes import OperationCodes
 from time import time
 
+
 class ClientFileSender(FileSender):
     def __init__(self, file_name, **kwargs):
         super().__init__(**kwargs)
         self.file_name = file_name
 
+    def check_file_exists(self):
+        try:
+            with open(f"{self.source_folder}/{self.file_name}", "rb") as f:
+                return True
+        except FileNotFoundError:
+            return False
+
     def _handle_send_process(self):
+        if not self.check_file_exists():
+            self.logger.error(f"File {self.file_name} doesnt exist")
+            return
         start_time = time()
         self.logger.info(f"Starting file sending process for file {self.file_name}")
-        input(f"Client port is {self.socket.port}")
+        # input(f"Client port is {self.socket.port}")
         self.handle_handshake()
         self.send_file()
         self.socket.close_connection()
