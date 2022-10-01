@@ -19,9 +19,6 @@ class ServerFileReceiver(FileReceiver, Thread):
     def run(self):
         starting_time = time()
         self.logger.info(f"Starting file receiving process for file {self.file_name}")
-        self.logger.info(
-            f"{self.file_size} bytes will be received from port {self.socket.opposite_address[1]}"
-        )
         self.handle_handshake()
         self.receive_file()
         self.socket.close_connection(confirm_close=True)

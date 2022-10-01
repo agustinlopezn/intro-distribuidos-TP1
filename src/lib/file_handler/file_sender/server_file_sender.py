@@ -13,13 +13,16 @@ class ServerFileSender(FileSender, Thread):
     def run(self):
         start_time = time()
         self.handle_process_start()
+        if self.file_size == -1:
+            self.logger.error(f"File {self.file_name} not found")
+            self.socket.close_connection()
+            return
         self.send_file()
         self.socket.close_connection()
         finish_time = time()
         self.logger.info(
             f"File {self.file_name} sent in %.2f seconds" % (finish_time - start_time)
         )
-
 
     def _handle_send_process(self):
         # just for polymorphism purposes

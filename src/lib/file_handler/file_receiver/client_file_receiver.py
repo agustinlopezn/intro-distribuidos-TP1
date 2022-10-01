@@ -16,6 +16,10 @@ class ClientFileReceiver(FileReceiver):
         start_time = time()
         self.logger.info(f"Starting file receiving process for file {self.file_name}")
         self.handle_process_start()
+        if self.file_size == -1:
+            self.logger.error(f"File {self.file_name} not found on server")
+            self.socket.close_connection(confirm_close=False)
+            return
         self.receive_file()
         self.socket.close_connection(confirm_close=True)
         finish_time = time()
@@ -29,4 +33,3 @@ class ClientFileReceiver(FileReceiver):
         # Check size limits before sending ACK
         port, file_size = data.decode().split("#")
         port, self.file_size = int(port), int(file_size)
-        self.logger.info(f"{self.file_size} bytes will be received from port {port}")

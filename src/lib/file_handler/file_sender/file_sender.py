@@ -13,7 +13,6 @@ class FileSender(FileHandler):
     def handle_send_process(self):
         self._handle_send_process()
 
-
     def send_file(self, showProgress=True):
         self.logger.debug(f"Sending {self.file_name}")
         try:
@@ -30,7 +29,10 @@ class FileSender(FileHandler):
                 return
         except Exception as e:
             self.logger.error("There was an error while sending the file")
-                
+
 
     def get_file_size(self, file_name):
-        return os.stat(f"{self.source_folder}/{file_name}").st_size
+        try:
+            return os.stat(f"{self.source_folder}/{file_name}").st_size
+        except FileNotFoundError:
+            return -1

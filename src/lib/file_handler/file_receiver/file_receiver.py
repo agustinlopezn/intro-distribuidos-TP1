@@ -22,6 +22,7 @@ class FileReceiver(FileHandler):
         self._handle_receive_process()
 
     def receive_file(self, showProgress=True):
+        self.logger.info(f"{self.file_size} bytes will be received")
         file_name = self.get_valid_name(f"{self.destination_folder}/{self.file_name}")
         bytes_received = 0
         try:
