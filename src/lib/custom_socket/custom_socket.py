@@ -100,7 +100,7 @@ class CustomSocket:
     #############################
 
     def serialize_information(self, port=None, file_size=None):
-        if not file_size:
+        if file_size is None:
             return str(port).encode()
         if not port:
             return str(file_size).encode()

@@ -9,6 +9,8 @@ from src.lib.operation_codes import OperationCodes
 from src.lib.thread_cleaner import ThreadCleaner
 from sys import argv
 
+MAX_FILE_SIZE = 1073741824  # 1GB, in bytes
+
 
 class Server:
     def __init__(self):
@@ -40,11 +42,11 @@ class Server:
 
     def handle_download(self, file_data, client_address):
         file_sender = ServerFileSender(
-                file_data,
-                src_folder=self.options.storage,
-                opposite_address=client_address,
-                logger=self.logger,
-            )
+            file_data,
+            src_folder=self.options.storage,
+            opposite_address=client_address,
+            logger=self.logger,
+        )
         file_sender.handle_send_process()
         self.threads[client_address] = file_sender
 

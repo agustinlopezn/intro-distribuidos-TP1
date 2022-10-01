@@ -1,7 +1,8 @@
-from src.lib.custom_socket.saw_socket import SaWSocket
-from src.lib.file_handler.file_sender.file_sender import FileSender
-from src.lib.operation_codes import OperationCodes
+import os
 from time import time
+
+from src.lib.file_handler.file_sender.file_sender import FileSender
+from src.server import MAX_FILE_SIZE
 
 
 class ClientFileSender(FileSender):
@@ -9,16 +10,20 @@ class ClientFileSender(FileSender):
         super().__init__(**kwargs)
         self.file_name = file_name
 
-    def check_file_exists(self):
-        try:
-            with open(f"{self.source_folder}/{self.file_name}", "rb") as f:
-                return True
-        except FileNotFoundError:
+    def is_valid_file(self):
+        file_name = f"{self.source_folder}/{self.file_name}"
+        if not os.path.exists(file_name):
+            self.logger.error(f"File {file_name} doesnt exist")
             return False
+        file_size = os.stat(file_name).st_size
+        if file_size > MAX_FILE_SIZE:
+            self.logger.error(f"File {file_name} is too big")
+            return False
+        return True
 
     def _handle_send_process(self):
-        if not self.check_file_exists():
-            self.logger.error(f"File {self.file_name} doesnt exist")
+        if not self.is_valid_file():
+            self.socket.close_connection()
             return
         start_time = time()
         self.logger.info(f"Starting file sending process for file {self.file_name}")
