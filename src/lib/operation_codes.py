@@ -16,8 +16,7 @@ class OperationCodes:
         "SV_INTRODUCTION",
         "DATA",
         "ACK",
-        "NSQ_ACK"
-        "END",
+        "NSQ_ACK" "END",
         "ERROR",
     ]
 

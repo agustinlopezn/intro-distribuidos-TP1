@@ -5,7 +5,7 @@ from src.lib.operation_codes import OperationCodes
 
 class GBNSocket(CustomSocket):
     RWND = 20
-    MAX_ATTEMPS = 5
+    MAX_ATTEMPS = 10
     TIMEOUT = 10 / 1000
     PROCESS_TIMEOUT = 20 / 1000  # Capaz se usa el timeout del custom socket
     MAX_RECEVING_TIME = 3  # max time to wait for data, then it breaks the connection
@@ -70,7 +70,7 @@ class GBNSocket(CustomSocket):
                 self.attemps -= 1
                 if self.attemps == 0:
                     self.logger.error("Receiver not responding, closing connection")
-                    raise Exception # should be more specific exception
+                    raise Exception  # should be more specific exception
                 self.logger.warning(f"Handling timeout...")
                 self.last_packet_sent = self.last_packet_acked
                 self.logger.debug(f"Last packet sent: {self.last_packet_sent}")
@@ -124,4 +124,3 @@ class GBNSocket(CustomSocket):
     def close_connection(self, confirm_close=False):
         self.socket.close()
         self.logger.info("Connection closed successfully")
-

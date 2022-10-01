@@ -5,7 +5,7 @@ from src.lib.operation_codes import OperationCodes
 
 
 class SaWSocket(CustomSocket):
-    MAX_ATTEMPS = 5
+    MAX_ATTEMPS = 10
     TIMEOUT = 10 / 1000
     MAX_RECEVING_TIME = 3
 
@@ -13,8 +13,7 @@ class SaWSocket(CustomSocket):
         super().__init__(seq_number=0, packet_type=SaWPacket, **kwargs)
 
     def send_ack(self, invert_ack=False):
-        # ack_number = int(not self.seq_number) if invert_ack else self.seq_number
-        ack_number = self.seq_number - 1 if invert_ack else self.seq_number
+        ack_number = int(not self.seq_number) if invert_ack else self.seq_number
         packet = self.packet_type.generate_packet(
             op_code=OperationCodes.ACK, seq_number=ack_number, data="".encode()
         )
@@ -33,8 +32,7 @@ class SaWSocket(CustomSocket):
         return received_seq_number == self.seq_number
 
     def update_seq_number(self):
-        # self.seq_number = int(not self.seq_number)
-        self.seq_number += 1  # this way is better for debugging
+        self.seq_number = int(not self.seq_number)
 
     def receive_data(self):
         self.socket.settimeout(self.MAX_RECEVING_TIME)

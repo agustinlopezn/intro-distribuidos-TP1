@@ -17,14 +17,14 @@ class SaWPacket(Packet):
         bytes = bytearray(cls.HEADER_SIZE + len(data))
         bytes[0] = op_code
         bytes[1] = seq_number  # need a more generic name
-        bytes[cls.HEADER_SIZE:] = data
+        bytes[cls.HEADER_SIZE :] = data
         return bytes
 
     @classmethod
     def parse_packet(cls, packet):
-        op_code = packet[0]
+        op_code = packet[
         seq_number = packet[1]
-        data = packet[cls.HEADER_SIZE:]
+        data = packet[cls.HEADER_SIZE :]
         return op_code, seq_number, data
 
     @classmethod
@@ -35,7 +35,7 @@ class SaWPacket(Packet):
 
     @classmethod
     def get_packet_data(cls, packet):
-        return packet[cls.HEADER_SIZE:]
+        return packet[cls.HEADER_SIZE :]
 
     @staticmethod
     def get_op_code(data):

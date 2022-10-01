@@ -15,13 +15,13 @@ class GBNPacket(Packet):
     def determine_seq_number(self, bytes_seq_number):
         seq_number = int.from_bytes(bytes_seq_number, byteorder="big", signed=False)
         seq_number = socket.ntohl(seq_number)
-        seq_number = -1 if seq_number == 2 ** 32 - 1 else seq_number
+        seq_number = -1 if seq_number == 2**32 - 1 else seq_number
         return seq_number
 
     @classmethod
     def generate_packet(cls, op_code, seq_number, data=b""):
         seq_number = (
-            socket.htonl(seq_number) if seq_number >= 0 else socket.htonl(2 ** 32 - 1)
+            socket.htonl(seq_number) if seq_number >= 0 else socket.htonl(2**32 - 1)
         )
         bytes_seq_number = seq_number.to_bytes(4, byteorder="big")
         bytes = bytearray(cls.HEADER_SIZE + len(data))
@@ -36,7 +36,7 @@ class GBNPacket(Packet):
         bytes_seq_number = packet[1:5]
         seq_number = int.from_bytes(bytes_seq_number, byteorder="big", signed=False)
         seq_number = socket.ntohl(seq_number)
-        seq_number = -1 if seq_number == 2 ** 32 - 1 else seq_number
+        seq_number = -1 if seq_number == 2**32 - 1 else seq_number
         data = packet[5:]
         return op_code, seq_number, data
 
@@ -48,7 +48,7 @@ class GBNPacket(Packet):
 
     @classmethod
     def get_packet_data(cls, packet):
-        return packet[cls.HEADER_SIZE:]
+        return packet[cls.HEADER_SIZE :]
 
     @classmethod
     def get_op_code(cls, data):

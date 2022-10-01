@@ -5,6 +5,7 @@ import os
 
 load_dotenv()
 
+
 class Accepter:
     def __init__(self, **kwargs):
         socket_type = SaWSocket if os.getenv("SOCKET_TYPE") == "SaW" else GBNSocket

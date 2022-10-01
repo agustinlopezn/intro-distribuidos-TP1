@@ -3,7 +3,6 @@ from colorlog import ColoredFormatter
 
 
 class Logger(object):
-
     def __init__(self, name, is_verbose, is_quiet):
         self.logger = logging.getLogger(name)
         self.logger.setLevel(self.define_log_level(is_verbose, is_quiet))
