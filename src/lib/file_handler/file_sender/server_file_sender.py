@@ -18,12 +18,12 @@ class ServerFileSender(FileSender, Thread):
             self.logger.error(f"File {self.file_name} not found")
             self.socket.close_connection()
             return
-        self.send_file(file_path=f"{self.source_dir}/{self.file_name}")
+        file_sent_success = self.send_file(
+            file_path=f"{self.source_dir}/{self.file_name}"
+        )
         self.socket.close_connection()
         finish_time = time()
-        self.logger.info(
-            f"File {self.file_name} sent in %.2f seconds" % (finish_time - start_time)
-        )
+        self.log_final_send_status(file_sent_success, finish_time - start_time)
 
     def _handle_send_process(self):
         # just for polymorphism purposes

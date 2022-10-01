@@ -21,13 +21,10 @@ class ClientFileReceiver(FileReceiver):
             self.logger.error(f"File {self.file_name} not found on server")
             self.socket.close_connection(confirm_close=False)
             return
-        self.receive_file(f"{self.dest_path}")
+        file_recvd_success = self.receive_file(f"{self.dest_path}")
         self.socket.close_connection(confirm_close=True)
         finish_time = time()
-        self.logger.info(
-            f"File {self.file_name} received in %.2f seconds"
-            % (finish_time - start_time)
-        )
+        self.log_final_receive_status(file_recvd_success, finish_time - start_time)
 
     def handle_process_start(self):
         data = self.socket.send_dl_request(self.file_name)

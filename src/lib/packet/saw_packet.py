@@ -22,7 +22,7 @@ class SaWPacket(Packet):
 
     @classmethod
     def parse_packet(cls, packet):
-        op_code = packet[
+        op_code = packet[0]
         seq_number = packet[1]
         data = packet[cls.HEADER_SIZE :]
         return op_code, seq_number, data

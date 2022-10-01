@@ -1,4 +1,5 @@
 from socket import *
+from threading import Thread
 
 from src.lib.accepter import Accepter
 from src.lib.logger import Logger
@@ -12,9 +13,18 @@ from sys import argv
 MAX_FILE_SIZE = 1073741824  # 1GB, in bytes
 
 
-class Server:
+class Server(Thread):
     def __init__(self):
+        super().__init__()
         self.threads = {}
+
+    def run(self):
+        self.start_server()
+
+    def stop(self):
+        self.accepter.socket.close_connection()
+        self.thread_cleaner.clean_threads()
+        self.logger.info("Threads joined successfully")
 
     def start_server(self):
         self.options = ServerOptions(argv[1:])

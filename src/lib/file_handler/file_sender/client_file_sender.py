@@ -32,12 +32,10 @@ class ClientFileSender(FileSender):
         )
         # input(f"Client port is {self.socket.port}")
         self.handle_handshake()
-        self.send_file(f"{self.source_path}")
+        file_sent_success = self.send_file(f"{self.source_path}")
         self.socket.close_connection()
         finish_time = time()
-        self.logger.info(
-            f"File {self.file_name} sent in %.2f seconds" % (finish_time - start_time)
-        )
+        self.log_final_send_status(file_sent_success, finish_time - start_time)
 
     def handle_handshake(self):
         self.file_size = self.get_file_size(self.source_path)

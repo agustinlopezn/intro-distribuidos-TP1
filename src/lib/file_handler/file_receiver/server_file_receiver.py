@@ -18,16 +18,15 @@ class ServerFileReceiver(FileReceiver, Thread):
         Thread.__init__(self)
 
     def run(self):
-        starting_time = time()
+        start_time = time()
         self.logger.info(f"Starting file receiving process for file {self.file_name}")
         self.handle_handshake()
-        self.receive_file(f"{self.destination_folder}/{self.file_name}")
+        file_recvd_success = self.receive_file(
+            f"{self.destination_folder}/{self.file_name}"
+        )
         self.socket.close_connection(confirm_close=True)
         finish_time = time()
-        self.logger.info(
-            f"File {self.file_name} received in %.2f seconds"
-            % (finish_time - starting_time)
-        )
+        self.log_final_receive_status(file_recvd_success, finish_time - start_time)
 
     def _handle_receive_process(self):
         # just for polymorphism purposes

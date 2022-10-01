@@ -33,11 +33,20 @@ class FileReceiver(FileHandler):
                     self.logger.info(
                         f"Progress: {bytes_received/self.file_size * 100:.0f}%"
                     )
-                return bytes_received
+                return True
         except Exception as e:
             if bytes_received == self.file_size:
                 self.logger.warning(
                     f"File {file_name} received successfully but something went wrong at the end"
                 )
-            else:
-                self.logger.error(f"File {file_name} received with errors: {e}")
+                return True
+            self.logger.error(f"File {file_name} received with errors: {e}")
+            return False
+
+    def log_final_receive_status(self, success, time_elapsed):
+        if success:
+            self.logger.info(
+                f"File {self.file_name} received in %.2f seconds" % (time_elapsed)
+            )
+        else:
+            self.logger.error(f"File {self.file_name} was not received")
