@@ -14,6 +14,9 @@ class Client:
     @classmethod
     def upload(cls):
         options = UploadOptions(sys.argv[1:])
+        if options.show_help:
+            print("Usage: python3 upload.py [-h] [-v] [-q] [-H host] [-p port] -u file")
+            return
         logger = Logger("client", options.verbose, options.quiet)
         server_address = (options.host, options.port)
         ClientFileSender(
@@ -26,6 +29,9 @@ class Client:
     @classmethod
     def download(cls):
         options = DownloadOptions(sys.argv[1:])
+        if options.show_help:
+            print("Usage: python3 download.py [-h] [-v] [-q] [-H host] [-p port]")
+            return
         logger = Logger("client", options.verbose, options.quiet)
         server_address = (options.host, options.port)
         ClientFileReceiver(

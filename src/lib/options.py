@@ -12,7 +12,7 @@ class ExecutionOptions:
         self.quiet = "-q" in self.arguments or "--quiet" in self.arguments
         host_index = (
             self.arguments.index("-H")
-            if "-h" in self.arguments
+            if "-H" in self.arguments
             else self.arguments.index("--host")
             if "--host" in self.arguments
             else -1

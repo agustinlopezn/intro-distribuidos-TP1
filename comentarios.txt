@@ -19,3 +19,5 @@ Falta descartar archivos que excedan el tamaño máximo (4 GB en principio)
 
 Hipotesis: 
 - En el server no hay ningun archivo mas alla de los subidos por clientes (No es necesario chequear el tamaño del archivo cuando un cliente descarga)
+
+Arreglar el help que se muestra!!

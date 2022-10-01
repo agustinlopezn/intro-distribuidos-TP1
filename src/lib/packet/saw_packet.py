@@ -4,7 +4,7 @@ import socket
 
 
 class SaWPacket(Packet):
-    MAX_PAYLOAD_SIZE = 1022
+    MAX_PAYLOAD_SIZE = 1024
     HEADER_SIZE = 2
     MAX_PACKET_SIZE = HEADER_SIZE + MAX_PAYLOAD_SIZE
 

@@ -11,6 +11,7 @@ class ClientFileSender(FileSender):
     def _handle_send_process(self):
         start_time = time()
         self.logger.info(f"Starting file sending process for file {self.file_name}")
+        input(f"Client port is {self.socket.port}")
         self.handle_handshake()
         self.send_file()
         self.socket.close_connection()
