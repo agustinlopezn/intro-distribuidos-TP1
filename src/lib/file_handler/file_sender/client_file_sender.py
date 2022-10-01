@@ -6,12 +6,13 @@ from src.server import MAX_FILE_SIZE
 
 
 class ClientFileSender(FileSender):
-    def __init__(self, file_name, **kwargs):
+    def __init__(self, file_name, source_path, **kwargs):
         super().__init__(**kwargs)
         self.file_name = file_name
+        self.source_path = source_path
 
     def is_valid_file(self):
-        file_name = f"{self.source_folder}/{self.file_name}"
+        file_name = f"{self.source_path}"
         if not os.path.exists(file_name):
             self.logger.error(f"File {file_name} doesnt exist")
             return False
@@ -26,10 +27,12 @@ class ClientFileSender(FileSender):
             self.socket.close_connection()
             return
         start_time = time()
-        self.logger.info(f"Starting file sending process for file {self.file_name}")
+        self.logger.info(
+            f"Starting file sending process for file {self.file_name} located in {self.source_path}"
+        )
         # input(f"Client port is {self.socket.port}")
         self.handle_handshake()
-        self.send_file()
+        self.send_file(f"{self.source_path}")
         self.socket.close_connection()
         finish_time = time()
         self.logger.info(
@@ -37,7 +40,7 @@ class ClientFileSender(FileSender):
         )
 
     def handle_handshake(self):
-        self.file_size = self.get_file_size(self.file_name)
+        self.file_size = self.get_file_size(self.source_path)
         self.logger.info(
             f"{self.file_size} bytes will be sent to port {self.socket.port}"
         )

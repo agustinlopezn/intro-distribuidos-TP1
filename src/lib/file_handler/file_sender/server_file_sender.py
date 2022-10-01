@@ -5,9 +5,10 @@ from src.lib.operation_codes import OperationCodes
 
 
 class ServerFileSender(FileSender, Thread):
-    def __init__(self, file_data, **kwargs):
+    def __init__(self, file_data, source_dir, **kwargs):
         super().__init__(**kwargs)
         self.file_name = file_data
+        self.source_dir = source_dir
         Thread.__init__(self)
 
     def run(self):
@@ -17,7 +18,7 @@ class ServerFileSender(FileSender, Thread):
             self.logger.error(f"File {self.file_name} not found")
             self.socket.close_connection()
             return
-        self.send_file()
+        self.send_file(file_path=f"{self.source_dir}/{self.file_name}")
         self.socket.close_connection()
         finish_time = time()
         self.logger.info(
@@ -29,5 +30,5 @@ class ServerFileSender(FileSender, Thread):
         self.start()
 
     def handle_process_start(self):
-        self.file_size = self.get_file_size(self.file_name)
+        self.file_size = self.get_file_size(f"{self.source_dir}/{self.file_name}")
         self.socket.send_sv_information(self.file_size)

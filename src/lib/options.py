@@ -35,7 +35,7 @@ class ExecutionOptions:
 
 
 class ClientOptions(ExecutionOptions):
-    DEFAULT_FILE_NAME = "test.pdf"
+    DEFAULT_FILE_NAME = "test"
 
     def __init__(self, arguments):
         super().__init__(arguments)
@@ -57,7 +57,7 @@ class ClientOptions(ExecutionOptions):
 
 
 class UploadOptions(ClientOptions):
-    DEFAULT_SRC_FOLDER = "files/source"
+    DEFAULT_SRC_PATH = ""
 
     def __init__(self, arguments):
         super().__init__(arguments)
@@ -74,7 +74,7 @@ class UploadOptions(ClientOptions):
         self.src = (
             self.arguments[self.src_index + 1]
             if self.src_index > -1
-            else self.DEFAULT_SRC_FOLDER
+            else self.DEFAULT_SRC_PATH
         )
 
 

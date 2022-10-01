@@ -43,7 +43,7 @@ class Server:
     def handle_download(self, file_data, client_address):
         file_sender = ServerFileSender(
             file_data,
-            src_folder=self.options.storage,
+            source_dir=self.options.storage,
             opposite_address=client_address,
             logger=self.logger,
         )

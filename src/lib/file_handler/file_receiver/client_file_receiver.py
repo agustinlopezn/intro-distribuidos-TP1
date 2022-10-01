@@ -4,23 +4,24 @@ from src.lib.file_handler.file_receiver.file_receiver import FileReceiver
 from src.lib.operation_codes import OperationCodes
 from time import time
 
-DEST_FOLDER = "files/downloaded/"
-
 
 class ClientFileReceiver(FileReceiver):
-    def __init__(self, file_name, **kwargs):
+    def __init__(self, file_name, dest_path, **kwargs):
         super().__init__(**kwargs)
         self.file_name = file_name
+        self.dest_path = dest_path
 
     def _handle_receive_process(self):
         start_time = time()
-        self.logger.info(f"Starting file receiving process for file {self.file_name}")
+        self.logger.info(
+            f"Starting file receiving process for file {self.file_name} to be stored in {self.dest_path}"
+        )
         self.handle_process_start()
         if self.file_size == -1:
             self.logger.error(f"File {self.file_name} not found on server")
             self.socket.close_connection(confirm_close=False)
             return
-        self.receive_file()
+        self.receive_file(f"{self.dest_path}")
         self.socket.close_connection(confirm_close=True)
         finish_time = time()
         self.logger.info(

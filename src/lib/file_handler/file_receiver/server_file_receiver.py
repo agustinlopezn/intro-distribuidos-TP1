@@ -10,17 +10,18 @@ class ServerFileReceiver(FileReceiver, Thread):
     def run(self):
         pass
 
-    def __init__(self, file_data, **kwargs):
+    def __init__(self, file_data, dest_folder, **kwargs):
         super().__init__(**kwargs)
         self.file_name = file_data.split("#")[0]
         self.file_size = int(file_data.split("#")[1])
+        self.destination_folder = dest_folder
         Thread.__init__(self)
 
     def run(self):
         starting_time = time()
         self.logger.info(f"Starting file receiving process for file {self.file_name}")
         self.handle_handshake()
-        self.receive_file()
+        self.receive_file(f"{self.destination_folder}/{self.file_name}")
         self.socket.close_connection(confirm_close=True)
         finish_time = time()
         self.logger.info(
@@ -35,4 +36,3 @@ class ServerFileReceiver(FileReceiver, Thread):
     def handle_handshake(self):
         self.socket.send_sv_information()
         # Check size limits before sending ACK
-

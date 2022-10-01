@@ -10,6 +10,7 @@ from src.lib.file_handler.file_receiver.client_file_receiver import (
 )
 from src.lib.operation_codes import OperationCodes
 
+
 class Client:
     @classmethod
     def upload(cls):
@@ -21,7 +22,7 @@ class Client:
         server_address = (options.host, options.port)
         ClientFileSender(
             options.file_name,
-            src_folder=options.src,
+            source_path=options.src,
             logger=logger,
             opposite_address=server_address,
         ).handle_send_process()
@@ -36,7 +37,7 @@ class Client:
         server_address = (options.host, options.port)
         ClientFileReceiver(
             options.file_name,
-            dest_folder=options.dst,
+            dest_path=options.dst,
             logger=logger,
             opposite_address=server_address,
         ).handle_receive_process()

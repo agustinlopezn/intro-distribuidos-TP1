@@ -6,8 +6,7 @@ import time
 
 
 class FileReceiver(FileHandler):
-    def __init__(self, dest_folder, **kwargs):
-        self.destination_folder = dest_folder
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def get_valid_name(self, file_name):
@@ -21,9 +20,9 @@ class FileReceiver(FileHandler):
     def handle_receive_process(self):
         self._handle_receive_process()
 
-    def receive_file(self, showProgress=True):
+    def receive_file(self, file_path=None):
         self.logger.info(f"{self.file_size} bytes will be received")
-        file_name = self.get_valid_name(f"{self.destination_folder}/{self.file_name}")
+        file_name = self.get_valid_name(f"{file_path}")
         bytes_received = 0
         try:
             with open(file_name, "wb") as f:
