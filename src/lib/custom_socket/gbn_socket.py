@@ -29,8 +29,8 @@ class GBNSocket(CustomSocket):
     def receive_data(self):
         packages = []
         self.seq_number = -1
+        self.socket.settimeout(self.MAX_RECEVING_TIME)
         while True:
-            self.socket.settimeout(self.MAX_RECEVING_TIME)
             data, address = self.socket.recvfrom(GBNPacket.MAX_PACKET_SIZE)
             op_code, seq_number, data = GBNPacket.parse_packet(data)
             self.logger.debug(

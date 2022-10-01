@@ -7,6 +7,7 @@ from src.lib.operation_codes import OperationCodes
 class SaWSocket(CustomSocket):
     MAX_ATTEMPS = 5
     TIMEOUT = 10 / 1000
+    MAX_RECEVING_TIME = 3
 
     def __init__(self, **kwargs):
         super().__init__(seq_number=0, packet_type=SaWPacket, **kwargs)
@@ -36,8 +37,8 @@ class SaWSocket(CustomSocket):
         self.seq_number += 1  # this way is better for debugging
 
     def receive_data(self):
+        self.socket.settimeout(self.MAX_RECEVING_TIME)
         while True:
-            self.socket.settimeout(None)
             data, address = self.socket.recvfrom(SaWPacket.MAX_PACKET_SIZE)
             op_code, seq_number, data = SaWPacket.parse_packet(data)
             self.logger.debug(

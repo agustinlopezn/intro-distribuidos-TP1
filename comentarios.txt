@@ -2,7 +2,6 @@
 
 A corregir:
   - Contemplar que el archivo no exista
-  - En Upload, a veces, se manda todo el archivo, pero el cliente no termina.
   - Si el server no esta levantado y el cliente quiere hacer una accion -> no pasa nada. manda el up,down y se queda esperando.
   - El tiempo del server tiene que ir al thread (sino es instantaneo)
   - El server no imprime el NO_SQ_ACK
