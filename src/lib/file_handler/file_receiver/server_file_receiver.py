@@ -3,6 +3,7 @@ from src.lib.file_handler.file_receiver.file_receiver import FileReceiver
 from src.lib.file_handler.file_sender.file_sender import FileSender
 from src.lib.operation_codes import OperationCodes
 from socket import timeout
+from time import time
 
 
 class ServerFileReceiver(FileReceiver, Thread):
@@ -16,19 +17,19 @@ class ServerFileReceiver(FileReceiver, Thread):
         Thread.__init__(self)
 
     def run(self):
+        starting_time = time()
         self.logger.info(f"Starting file receiving process for file {self.file_name}")
         self.logger.info(
             f"{self.file_size} bytes will be received from port {self.socket.opposite_address[1]}"
         )
-        try:
-            self.handle_handshake()
-            self.receive_file()
-        except timeout:
-            self.logger.error(
-                f"Timeout reached while receiving, closing connection with client at port {self.socket.opposite_address[1]}"
-            )
-        finally:
-            self.socket.close_connection(confirm_close=True)
+        self.handle_handshake()
+        self.receive_file()
+        self.socket.close_connection(confirm_close=True)
+        finish_time = time()
+        self.logger.info(
+            f"File {self.file_name} received in %.2f seconds"
+            % (finish_time - starting_time)
+        )
 
     def _handle_receive_process(self):
         # just for polymorphism purposes

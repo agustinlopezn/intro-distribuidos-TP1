@@ -2,10 +2,7 @@
 
 A corregir:
   - Contemplar que el archivo no exista
-  - Si el server no esta levantado y el cliente quiere hacer una accion -> no pasa nada. manda el up,down y se queda esperando.
   - El tiempo del server tiene que ir al thread (sino es instantaneo)
-  - El server no imprime el NO_SQ_ACK
-  - Si se muere el cliente el server no se entera
   - El server no imprime el progreso por el CHUNK_SIZE grande, capaz moverlo al socket?
 
 GBN:

@@ -19,13 +19,7 @@ class FileReceiver(FileHandler):
         return file_name
 
     def handle_receive_process(self):
-        start_time = time.time()
         self._handle_receive_process()
-        finish_time = time.time()
-        self.logger.info(
-            f"File {self.file_name} received in %.2f seconds"
-            % (finish_time - start_time)
-        )
 
     def receive_file(self, showProgress=True):
         file_name = self.get_valid_name(f"{self.destination_folder}/{self.file_name}")

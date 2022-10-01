@@ -8,7 +8,7 @@ class GBNSocket(CustomSocket):
     MAX_ATTEMPS = 5
     TIMEOUT = 10 / 1000
     PROCESS_TIMEOUT = 20 / 1000  # Capaz se usa el timeout del custom socket
-    MAX_RECEVING_TIME = 3 # max time to wait for data, then it breaks the connection
+    MAX_RECEVING_TIME = 3  # max time to wait for data, then it breaks the connection
 
     def __init__(self, **kwargs):
         super().__init__(seq_number=-1, packet_type=GBNPacket, **kwargs)
@@ -53,6 +53,7 @@ class GBNSocket(CustomSocket):
         self._send_and_wait(OperationCodes.END, "".encode(), OperationCodes.NSQ_ACK)
 
     def send_data(self, data):
+        self.attemps = self.MAX_ATTEMPS
         self.last_packet_sent = -1
         self.last_packet_acked = -1
         max_packet_size = GBNPacket.MAX_PAYLOAD_SIZE
@@ -66,6 +67,10 @@ class GBNSocket(CustomSocket):
             try:
                 self.wait_ack()
             except timeout:
+                self.attemps -= 1
+                if self.attemps == 0:
+                    self.logger.error("Receiver not responding, closing connection")
+                    raise Exception # should be more specific exception
                 self.logger.warning(f"Handling timeout...")
                 self.last_packet_sent = self.last_packet_acked
                 self.logger.debug(f"Last packet sent: {self.last_packet_sent}")
@@ -79,9 +84,16 @@ class GBNSocket(CustomSocket):
         op_code, ack_number, _data = GBNPacket.parse_packet(data)
 
         if op_code == OperationCodes.ACK and self.valid_opposite_address(address):
+            self.attemps = (
+                self.MAX_ATTEMPS
+            )  # restarting timeout counter bc receiver is alive
             if ack_number > self.last_packet_acked:
                 self.logger.debug(f"Updating last packet acked to {ack_number}")
                 self.last_packet_acked = ack_number
+        else:
+            self.logger.debug(
+                f"Received and discarded packet with op_code {OperationCodes.op_name(op_code)}"
+            )
 
     def try_to_send_packets(self):
         self.logger.debug(f"Trying to send packages...")

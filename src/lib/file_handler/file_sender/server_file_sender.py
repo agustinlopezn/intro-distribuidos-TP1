@@ -1,5 +1,5 @@
-import os
 from threading import Thread
+from time import time
 from src.lib.file_handler.file_sender.file_sender import FileSender
 from src.lib.operation_codes import OperationCodes
 
@@ -11,9 +11,15 @@ class ServerFileSender(FileSender, Thread):
         Thread.__init__(self)
 
     def run(self):
+        start_time = time()
         self.handle_process_start()
         self.send_file()
         self.socket.close_connection()
+        finish_time = time()
+        self.logger.info(
+            f"File {self.file_name} sent in %.2f seconds" % (finish_time - start_time)
+        )
+
 
     def _handle_send_process(self):
         # just for polymorphism purposes

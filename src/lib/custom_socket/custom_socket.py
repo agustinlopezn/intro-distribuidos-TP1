@@ -31,6 +31,7 @@ class CustomSocket:
     #############################
 
     def send_nsq_ack(self):
+        self.logger.debug("Sending NSQ_ACK")
         packet = self.generate_packet(op_code=OperationCodes.NSQ_ACK)
         self._send(packet)
 
@@ -76,6 +77,7 @@ class CustomSocket:
             if op_code == OperationCodes.NSQ_ACK and self.valid_opposite_address(
                 address
             ):
+                self.logger.debug(f"Received nsq ack with seq_number {seq_number}")
                 return data
             if op_code == OperationCodes.ACK and self.valid_packet(address, seq_number):
                 self.logger.debug(f"Received ack with seq_number {seq_number}")
