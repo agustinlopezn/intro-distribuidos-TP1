@@ -14,16 +14,14 @@ class ServerFileReceiver(FileReceiver, Thread):
         super().__init__(**kwargs)
         self.file_name = file_data.split("#")[0]
         self.file_size = int(file_data.split("#")[1])
-        self.destination_folder = dest_folder
+        self.destination_path = f"{dest_folder}/{self.file_name}"
         Thread.__init__(self)
 
     def run(self):
         start_time = time()
         self.logger.info(f"Starting file receiving process for file {self.file_name}")
         self.handle_handshake()
-        file_recvd_success = self.receive_file(
-            f"{self.destination_folder}/{self.file_name}"
-        )
+        file_recvd_success = self.receive_file()
         self.socket.close_connection(confirm_close=True)
         finish_time = time()
         self.log_final_receive_status(file_recvd_success, finish_time - start_time)

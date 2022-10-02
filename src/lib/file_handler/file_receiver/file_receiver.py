@@ -20,9 +20,9 @@ class FileReceiver(FileHandler):
     def handle_receive_process(self):
         self._handle_receive_process()
 
-    def receive_file(self, file_path=None):
+    def receive_file(self):
         self.logger.info(f"{self.file_size} bytes will be received")
-        file_name = self.get_valid_name(f"{file_path}")
+        file_name = self.get_valid_name(f"{self.destination_path}")
         bytes_received = 0
         try:
             with open(file_name, "wb") as f:

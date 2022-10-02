@@ -9,12 +9,12 @@ class ClientFileReceiver(FileReceiver):
     def __init__(self, file_name, dest_path, **kwargs):
         super().__init__(**kwargs)
         self.file_name = file_name
-        self.dest_path = dest_path
+        self.destination_path = dest_path
 
     def _handle_receive_process(self):
         start_time = time()
         self.logger.info(
-            f"Starting file receiving process for file {self.file_name} to be stored in {self.dest_path}"
+            f"Starting file receiving process for file {self.file_name} to be stored in {self.destination_path}"
         )
         self.handle_process_start()
         if self.file_size == -1:
@@ -22,7 +22,7 @@ class ClientFileReceiver(FileReceiver):
             self.socket.close_connection(confirm_close=False)
             return
         #file_path = self.dest_path + "/" + self.file_name
-        file_recvd_success = self.receive_file(self.dest_path)
+        file_recvd_success = self.receive_file()
         self.socket.close_connection(confirm_close=True)
         finish_time = time()
         self.log_final_receive_status(file_recvd_success, finish_time - start_time)

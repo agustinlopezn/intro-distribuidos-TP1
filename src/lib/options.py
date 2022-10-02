@@ -59,7 +59,7 @@ class ClientOptions(ExecutionOptions):
 
 
 class UploadOptions(ClientOptions):
-    DEFAULT_SRC_PATH = ""
+    DEFAULT_SRC_PATH = "files/source/untitled.pdf"
 
     def __init__(self, arguments):
         super().__init__(arguments)
@@ -80,10 +80,10 @@ class UploadOptions(ClientOptions):
         )
 
     def valid(self):
-        return type(self.port) == int and os.path.isfile(self.src)
+        return type(self.port) == int # and os.path.isfile(self.src)
 
 class DownloadOptions(ClientOptions):
-    DEFAULT_DEST_FOLDER = "files/downloaded"
+    DEFAULT_DEST_FOLDER = "files/downloaded/untitled.pdf"
 
     def __init__(self, arguments):
         super().__init__(arguments)
@@ -104,7 +104,7 @@ class DownloadOptions(ClientOptions):
         )
     
     def valid(self):
-        return type(self.port) == int and os.path.isdir(self.dst)
+        return type(self.port) == int # and os.path.isdir(self.dst)
 
 
 class ServerOptions(ExecutionOptions):
