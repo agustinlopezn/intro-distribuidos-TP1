@@ -14,9 +14,10 @@ MAX_FILE_SIZE = 1073741824  # 1GB, in bytes
 
 
 class Server(Thread):
-    def __init__(self):
+    def __init__(self, options):
         super().__init__()
         self.threads = {}
+        self.options = options
 
     def run(self):
         self.start_server()
@@ -27,13 +28,12 @@ class Server(Thread):
         self.logger.info("Threads joined successfully")
 
     def start_server(self):
-        self.options = ServerOptions(argv[1:])
         if not self.options.valid():
             print("Error: some options are invalid")
             self.options.show_help = True
         if self.options.show_help:
             print("Usage: python3 start-server.py [-h] [-v] [-q] [-H host] [-p port]")
-            return
+            exit(0)
         self.prepare_execution()
         while True:
             op_code, client_address, file_data = self.accepter.accept()

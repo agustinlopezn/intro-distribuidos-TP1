@@ -1,10 +1,14 @@
+from sys import argv
+from src.lib.options import ServerOptions
 from src.server import Server
 
-
-if __name__ == "__main__":
-
+def start_server():
     try:
-        server = Server()
+        options = ServerOptions(argv[1:])
+        if options.show_help:
+            print("usage: start-server [-h] [-v | -q] [-H ADDR] [-p PORT] [-s DIRPATH]")
+            return
+        server = Server(options)
         server.daemon = True
         server.start()
 
@@ -23,3 +27,7 @@ if __name__ == "__main__":
         print("An unknown error occurred")
         input("Press enter to exit")
         exit(1)
+
+if __name__ == "__main__":
+    start_server()
+

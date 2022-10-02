@@ -20,7 +20,7 @@ class Client:
             print("Error: some options are invalid")
             options.show_help = True
         if options.show_help:
-            print("Usage: python3 upload.py [-h] [-v | -q] [-H ADDR] [-p PORT] [-s FILEPATH] [-n FILENAME]")
+            print("usage: upload [-h] [-v | -q] [-H ADDR] [-p PORT] [-s FILEPATH] [-n FILENAME]")
             return
         logger = Logger("client", options.verbose, options.quiet)
         server_address = (options.host, options.port)
@@ -38,7 +38,7 @@ class Client:
             print("Error: some options are invalid")
             options.show_help = True
         if options.show_help:
-            print("Usage: python3 download.py [-h] [-v] [-q] [-H host] [-p port]")
+            print("usage: download [-h] [-v | -q] [-H ADDR] [-p PORT] [-d FILEPATH] [-n FILENAME]")
             return
         logger = Logger("client", options.verbose, options.quiet)
         server_address = (options.host, options.port)
