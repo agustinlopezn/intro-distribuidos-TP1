@@ -80,7 +80,7 @@ class UploadOptions(ClientOptions):
         self.src = (
             self.arguments[self.src_index + 1]
             if self.src_index > -1
-            else self.DEFAULT_SRC_PATH
+            else self.DEFAULT_SRC_PATH + self.file_name
         )
 
     def valid(self):
@@ -105,7 +105,7 @@ class DownloadOptions(ClientOptions):
         self.dst = (
             self.arguments[self.dst_index + 1]
             if self.dst_index > -1
-            else self.DEFAULT_DEST_FILE_PATH
+            else self.DEFAULT_DEST_FILE_PATH + self.file_name
         )
 
     def valid(self):
