@@ -12,10 +12,6 @@ class SaWPacket(Packet):
     def generate_packet(cls, op_code, seq_number, data=b""):
         bytes = bytearray(cls.HEADER_SIZE + len(data))
         bytes[0] = op_code
-        if seq_number < 0:
-            import pdb
-
-            pdb.set_trace()
         bytes[1] = seq_number  # need a more generic name
         bytes[cls.HEADER_SIZE :] = data
         return bytes

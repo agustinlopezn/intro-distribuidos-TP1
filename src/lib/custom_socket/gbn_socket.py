@@ -87,7 +87,10 @@ class GBNSocket(CustomSocket):
             self.attemps = (
                 self.MAX_ATTEMPS
             )  # restarting timeout counter bc receiver is alive
-            if ack_number > self.last_packet_acked:
+            if (
+                ack_number > self.last_packet_acked
+                and ack_number <= self.last_packet_sent
+            ):
                 self.logger.debug(f"Updating last packet acked to {ack_number}")
                 self.last_packet_acked = ack_number
         else:

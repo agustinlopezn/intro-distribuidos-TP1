@@ -70,10 +70,12 @@ class CustomSocket:
     #     RECEIVING METHODS     #
     #############################
 
-    def receive_ack(self):
+    def receive_ack(self, expected_op_code):
         while True:
             data, address = self.socket.recvfrom(self.packet_type.MAX_PACKET_SIZE)
             op_code, seq_number, data = self.packet_type.parse_packet(data)
+            if expected_op_code != op_code:
+                continue
             if op_code == OperationCodes.NSQ_ACK and self.valid_opposite_address(
                 address
             ):
@@ -93,7 +95,7 @@ class CustomSocket:
             expected_op_code == OperationCodes.NSQ_ACK
             or expected_op_code == OperationCodes.ACK
         ):
-            return self.receive_ack()
+            return self.receive_ack(expected_op_code)
 
     #############################
     #     HANDSHAKE METHODS     #
