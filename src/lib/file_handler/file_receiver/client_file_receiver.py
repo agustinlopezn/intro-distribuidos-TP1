@@ -21,7 +21,7 @@ class ClientFileReceiver(FileReceiver):
             self.logger.error(f"File {self.file_name} not found on server")
             self.socket.close_connection(confirm_close=False)
             return
-        #file_path = self.dest_path + "/" + self.file_name
+
         file_recvd_success = self.receive_file()
         self.socket.close_connection(confirm_close=True)
         finish_time = time()
