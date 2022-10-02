@@ -14,5 +14,9 @@ class Packet:
         raise NotImplementedError
 
     @staticmethod
-    def create_server_information(port):
+    def get_op_code(data):
         raise NotImplementedError
+
+    @classmethod
+    def get_packet_data(cls, packet):
+        return packet[cls.HEADER_SIZE :]

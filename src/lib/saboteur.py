@@ -48,7 +48,7 @@ class Saboteur:
 
     def sabotage_packet(self, packet):
         op_code = packet[0]
-        seq_number = self.packet_type.determine_seq_number(packet[1:5])
+        seq_number = self.packet_type.get_seq_number(packet)
         if random() < DELAY_PROBABILITY:
             Delayer(self.send_function, packet, self.logger).start()
             self.logger.warning(

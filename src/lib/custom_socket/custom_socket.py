@@ -42,7 +42,7 @@ class CustomSocket:
         return packet
 
     def _send(self, packet):
-        seq_number = self.packet_type.determine_seq_number(packet[1:5])
+        seq_number = self.packet_type.get_seq_number(packet)
         self.logger.debug(
             f"Sending packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number} from port {self.port}"
         )
