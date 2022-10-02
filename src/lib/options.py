@@ -1,8 +1,12 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 class ExecutionOptions:
-    DEFAULT_HOST = "127.0.0.1"
-    DEFAULT_SERVER_PORT = 8000
+    DEFAULT_HOST = os.getenv("DEFAULT_HOST")
+    DEFAULT_SERVER_PORT = os.getenv("DEFAULT_SERVER_PORT")
 
     def __init__(self, arguments):
         self.arguments = arguments
@@ -32,12 +36,12 @@ class ExecutionOptions:
         self.port = (
             self.arguments[port_index + 1]
             if port_index > -1
-            else self.DEFAULT_SERVER_PORT
+            else int(self.DEFAULT_SERVER_PORT)
         )
 
 
 class ClientOptions(ExecutionOptions):
-    DEFAULT_FILE_NAME = "untitled"
+    DEFAULT_FILE_NAME = os.getenv("DEFAULT_FILE_NAME")
 
     def __init__(self, arguments):
         super().__init__(arguments)
@@ -59,7 +63,7 @@ class ClientOptions(ExecutionOptions):
 
 
 class UploadOptions(ClientOptions):
-    DEFAULT_SRC_PATH = "files/source/untitled.pdf"
+    DEFAULT_SRC_PATH = os.getenv("DEFAULT_SRC_PATH")
 
     def __init__(self, arguments):
         super().__init__(arguments)
@@ -80,10 +84,11 @@ class UploadOptions(ClientOptions):
         )
 
     def valid(self):
-        return type(self.port) == int # and os.path.isfile(self.src)
+        return type(self.port) == int  # and os.path.isfile(self.src)
+
 
 class DownloadOptions(ClientOptions):
-    DEFAULT_DEST_FOLDER = "files/downloaded/untitled.pdf"
+    DEFAULT_DEST_FILE_PATH = os.getenv("DEFAULT_DEST_FILE_PATH")
 
     def __init__(self, arguments):
         super().__init__(arguments)
@@ -100,15 +105,15 @@ class DownloadOptions(ClientOptions):
         self.dst = (
             self.arguments[self.dst_index + 1]
             if self.dst_index > -1
-            else self.DEFAULT_DEST_FOLDER
+            else self.DEFAULT_DEST_FILE_PATH
         )
-    
+
     def valid(self):
-        return type(self.port) == int # and os.path.isdir(self.dst)
+        return type(self.port) == int  # and os.path.isdir(self.dst)
 
 
 class ServerOptions(ExecutionOptions):
-    DEFAULT_STORAGE = "files/uploaded"
+    DEFAULT_STORAGE = os.getenv("DEFAULT_STORAGE")
 
     def __init__(self, arguments):
         super().__init__(arguments)
@@ -127,5 +132,6 @@ class ServerOptions(ExecutionOptions):
             if self.storage_index > -1
             else self.DEFAULT_STORAGE
         )
+
     def valid(self):
         return type(self.port) == int and os.path.isdir(self.storage)
