@@ -1,3 +1,5 @@
+import os
+
 class ExecutionOptions:
     DEFAULT_HOST = "127.0.0.1"
     DEFAULT_SERVER_PORT = 8000
@@ -35,7 +37,7 @@ class ExecutionOptions:
 
 
 class ClientOptions(ExecutionOptions):
-    DEFAULT_FILE_NAME = "test"
+    DEFAULT_FILE_NAME = "untitled"
 
     def __init__(self, arguments):
         super().__init__(arguments)
@@ -77,6 +79,8 @@ class UploadOptions(ClientOptions):
             else self.DEFAULT_SRC_PATH
         )
 
+    def valid(self):
+        return type(self.port) == int and os.path.isfile(self.src)
 
 class DownloadOptions(ClientOptions):
     DEFAULT_DEST_FOLDER = "files/downloaded"
@@ -98,6 +102,9 @@ class DownloadOptions(ClientOptions):
             if self.dst_index > -1
             else self.DEFAULT_DEST_FOLDER
         )
+    
+    def valid(self):
+        return type(self.port) == int and os.path.isdir(self.dst)
 
 
 class ServerOptions(ExecutionOptions):
@@ -120,3 +127,5 @@ class ServerOptions(ExecutionOptions):
             if self.storage_index > -1
             else self.DEFAULT_STORAGE
         )
+    def valid(self):
+        return type(self.port) == int and os.path.isdir(self.storage)

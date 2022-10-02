@@ -15,8 +15,12 @@ class Client:
     @classmethod
     def upload(cls):
         options = UploadOptions(sys.argv[1:])
+        
+        if not options.valid():
+            print("Error: some options are invalid")
+            options.show_help = True
         if options.show_help:
-            print("Usage: python3 upload.py [-h] [-v] [-q] [-H host] [-p port] -u file")
+            print("Usage: python3 upload.py [-h] [-v | -q] [-H ADDR] [-p PORT] [-s FILEPATH] [-n FILENAME]")
             return
         logger = Logger("client", options.verbose, options.quiet)
         server_address = (options.host, options.port)
@@ -30,6 +34,9 @@ class Client:
     @classmethod
     def download(cls):
         options = DownloadOptions(sys.argv[1:])
+        if not options.valid():
+            print("Error: some options are invalid")
+            options.show_help = True
         if options.show_help:
             print("Usage: python3 download.py [-h] [-v] [-q] [-H host] [-p port]")
             return
