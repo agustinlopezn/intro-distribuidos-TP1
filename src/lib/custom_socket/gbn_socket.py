@@ -69,6 +69,11 @@ class GBNSocket(CustomSocket):
             self.logger.debug(
                 f"[DATA] Received packet from port {address[1]} with seq_number {seq_number} and op_code {OperationCodes.op_name(op_code)}"
             )
+            if chunk_number != self.chunk_number:
+                self.logger.debug(
+                    f"Discarding packet with op_code {OperationCodes.op_name(op_code)} and seq_number {self.seq_number} from older chunk: {chunk_number}"
+                )
+                continue
             if op_code == OperationCodes.DATA:
                 if self.consecutive_seq_number(seq_number):
                     self.update_seq_number()
