@@ -4,6 +4,9 @@ from src.lib.operation_codes import OperationCodes
 from src.lib.saboteur import Saboteur
 
 
+SEPARATOR_CHARACTER = "\0"
+
+
 class CustomSocket:
     __abstract__ = True
 
@@ -101,18 +104,22 @@ class CustomSocket:
     #     HANDSHAKE METHODS     #
     #############################
 
-    def serialize_information(self, port=None, file_size=None):
-        if file_size is None:
-            return str(port).encode()
-        if not port:
-            return str(file_size).encode()
-        return f"{port}#{file_size}".encode()
+    def serialize_information(self, port="", file_size="", file_name=""):
+        return f"{port}{SEPARATOR_CHARACTER}{file_size}{SEPARATOR_CHARACTER}{file_name}".encode()
 
-    def send_sv_information(self, file_size=None):
+    def deserialize_information(self, data):
+        port, file_size, file_name = data.split(SEPARATOR_CHARACTER)
+        if port:
+            port = int(port)
+        if file_size:
+            file_size = int(file_size)
+        return port, file_size, file_name
+
+    def send_sv_information(self, file_size="", file_name=""):
         self.logger.debug(
-            f"Sending server information: port = {self.port}, file_size = {file_size}"
+            f"Sending server information: port = {self.port}, file_size = {file_size}, file_name = {file_name}"
         )
-        data = self.serialize_information(self.port, file_size)
+        data = self.serialize_information(self.port, file_size, file_name)
         try:
             self._send_and_wait(
                 OperationCodes.SV_INTRODUCTION, data, OperationCodes.NSQ_ACK
@@ -137,20 +144,25 @@ class CustomSocket:
         self.logger.debug(
             f"Sending download request with port {self.port}, file_name {file_name}"
         )
-        encoded_data = self.serialize_information(file_name)
+        encoded_data = self.serialize_information(file_name=file_name)
         response_data = self._send_and_wait(
             OperationCodes.DOWNLOAD, encoded_data, OperationCodes.SV_INTRODUCTION
         )
         self.send_nsq_ack()
         return response_data
 
-    def send_up_request(self, file_name, file_size=None):
+    def send_up_request(self, file_name, file_size):
+
         self.logger.debug(
             f"Sending upload request with port {self.port}, file_name {file_name} and file_size {file_size}"
         )
-        data = self.serialize_information(file_name, file_size)
-        self._send_and_wait(OperationCodes.UPLOAD, data, OperationCodes.SV_INTRODUCTION)
+        data = self.serialize_information(file_size=file_size, file_name=file_name)
+        data = self._send_and_wait(
+            OperationCodes.UPLOAD, data, OperationCodes.SV_INTRODUCTION
+        )
         self.send_nsq_ack()
+        port, file_size, file_name = self.deserialize_information(data.decode())
+        return file_name
 
     #############################
     #       OTHER METHODS       #

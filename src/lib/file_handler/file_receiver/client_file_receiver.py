@@ -29,5 +29,6 @@ class ClientFileReceiver(FileReceiver):
     def handle_process_start(self):
         data = self.socket.send_dl_request(self.file_name)
         # Check size limits before sending ACK
-        port, file_size = data.decode().split("#")
-        port, self.file_size = int(port), int(file_size)
+        port, self.file_size, file_name = self.socket.deserialize_information(
+            data.decode()
+        )

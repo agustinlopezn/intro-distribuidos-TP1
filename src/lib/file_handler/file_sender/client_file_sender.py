@@ -31,7 +31,10 @@ class ClientFileSender(FileSender):
             f"Starting file sending process for file {self.file_name} located in {self.source_path}"
         )
         input(f"Client port is {self.socket.port}. Press enter to start request...")
-        self.handle_handshake()
+        new_file_name = self.handle_handshake()
+        if new_file_name:
+            self.file_name = new_file_name
+        self.logger.info(f"File will be uploaded as {self.file_name}")
         file_sent_success = self.send_file(f"{self.source_path}")
         self.socket.close_connection()
         finish_time = time()
@@ -42,4 +45,4 @@ class ClientFileSender(FileSender):
         self.logger.info(
             f"{self.file_size} bytes will be sent to port {self.socket.port}"
         )
-        self.socket.send_up_request(self.file_name, self.file_size)
+        return self.socket.send_up_request(self.file_name, self.file_size)

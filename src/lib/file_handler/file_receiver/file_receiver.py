@@ -11,16 +11,16 @@ class FileReceiver(FileHandler):
         counter = 1
         name_parts = os.path.splitext(file_name)
         while os.path.exists(file_name):
-            file_name = name_parts[0] + (f" ({counter})" + name_parts[1])
+            file_name = name_parts[0] + (f"({counter})" + name_parts[1])
             counter += 1
-        return file_name
+        return file_name, os.path.basename(file_name)
 
     def handle_receive_process(self):
         self._handle_receive_process()
 
     def receive_file(self):
         self.logger.info(f"{self.file_size} bytes will be received")
-        file_name = self.get_valid_name(f"{self.destination_path}")
+        file_name = self.destination_path
         bytes_received = 0
         try:
             with open(file_name, "wb") as f:

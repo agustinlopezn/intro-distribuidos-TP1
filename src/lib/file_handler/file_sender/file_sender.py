@@ -37,6 +37,7 @@ class FileSender(FileHandler):
 
     def log_final_send_status(self, success, time_elapsed):
         if success:
+            self.logger.info(f"File was uploaded as {self.file_name}")
             self.logger.info(
                 f"File {self.file_name} sent in %.2f seconds" % (time_elapsed)
             )
