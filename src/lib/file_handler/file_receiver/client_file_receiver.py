@@ -18,7 +18,7 @@ class ClientFileReceiver(FileReceiver):
         self.handle_process_start()
         if self.file_size == -1:
             self.logger.error(f"File {self.file_name} not found on server")
-            self.socket.close_connection(confirm_close=False)
+            self.socket.close_connection()
             return
 
         file_recvd_success = self.receive_file()

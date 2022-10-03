@@ -184,6 +184,9 @@ class GBNSocket(CustomSocket):
         return self.valid_opposite_address(address)
 
     def close_connection(self, confirm_close=False):
+        if confirm_close:
+            for _ in range(self.MAX_ATTEMPS):
+                self.send_end_ack()
         self.socket.close()
         self.logger.info("Connection closed successfully")
 
