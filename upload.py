@@ -3,9 +3,13 @@ from src.client import Client
 
 if __name__ == "__main__":
     try:
-        Client.upload()
-    except Exception as e:
-        raise(e)
-        # print("An exception occurred: ", e)
-        # input("Press enter to exit")
-        # exit(1)
+        Client().upload()
+
+    except KeyboardInterrupt:
+        print("\n-- Exiting --")
+        exit(0)
+
+    except:
+        print("An unknown error occurred")
+        input("Press enter to exit")
+        exit(1)
