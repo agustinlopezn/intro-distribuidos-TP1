@@ -3,8 +3,8 @@ from threading import Thread
 import time
 from src.lib.operation_codes import OperationCodes
 
-DELAY_PROBABILITY = 0
-DROP_PROBABILITY = 0.2
+DELAY_PROBABILITY = 0.15
+DROP_PROBABILITY = 0
 DUPLICATION_PROBABILITY = 0
 
 

@@ -12,12 +12,25 @@ class GBNSocket(CustomSocket):
 
     def __init__(self, **kwargs):
         super().__init__(seq_number=-1, packet_type=GBNPacket, **kwargs)
+        self.chunk_number = 0
 
     def send_ack(self):
         packet = GBNPacket.generate_packet(
-            op_code=OperationCodes.ACK, seq_number=self.seq_number, data="".encode()
+            op_code=OperationCodes.ACK,
+            seq_number=self.seq_number,
+            chunk_number=self.chunk_number,
+            data="".encode(),
         )
         self._send(packet)
+
+    def generate_packet(self, op_code, data=b""):
+        packet = self.packet_type.generate_packet(
+            op_code=op_code,
+            seq_number=self.seq_number,
+            chunk_number=self.chunk_number,
+            data=data,
+        )
+        return packet
 
     def consecutive_seq_number(self, seq_number):
         # seq_number must be last acked + 1
@@ -26,13 +39,29 @@ class GBNSocket(CustomSocket):
     def update_seq_number(self):
         self.seq_number += 1
 
+    def send_end_ack(self):
+        self._send(self.generate_packet(OperationCodes.END_ACK))
+
+    def receive_sv_information(self):
+        while True:
+            data, address = self.socket.recvfrom(self.packet_type.MAX_PACKET_SIZE)
+            op_code, seq_number, chunk_number, parsed_data = self.packet_type.parse_packet(
+                data
+            )
+            if op_code == OperationCodes.SV_INTRODUCTION:
+                self.logger.debug(f"Received server information: {parsed_data}")
+                self.opposite_address = address
+                return parsed_data
+
     def receive_data(self):
+        self.chunk_number += 1
+        self.logger.debug(f"Receiving chunk {self.chunk_number}")
         packages = []
         self.seq_number = -1
         self.socket.settimeout(self.MAX_RECEVING_TIME)
         while True:
             data, address = self.socket.recvfrom(GBNPacket.MAX_PACKET_SIZE)
-            op_code, seq_number, data = GBNPacket.parse_packet(data)
+            op_code, seq_number, chunk_number, data = GBNPacket.parse_packet(data)
             self.logger.debug(
                 f"[DATA] Received packet from port {address[1]} with seq_number {seq_number} and op_code {OperationCodes.op_name(op_code)}"
             )
@@ -45,14 +74,19 @@ class GBNSocket(CustomSocket):
                     self.send_ack()
             elif op_code == OperationCodes.END:
                 for i in range(self.MAX_ATTEMPS):
-                    self.send_nsq_ack()
+                    self.send_end_ack()
                 break
         return b"".join(packages)
 
     def send_end(self):
-        self._send_and_wait(OperationCodes.END, "".encode(), OperationCodes.NSQ_ACK)
+        self._send_and_wait(OperationCodes.END, "".encode(), OperationCodes.END_ACK)
+
+    def valid_chunk_number(self, chunk_number):
+        return chunk_number == self.chunk_number
 
     def send_data(self, data):
+        self.chunk_number += 1
+        self.logger.debug(f"Sending chunk {self.chunk_number}")
         self.attemps = self.MAX_ATTEMPS
         self.last_packet_sent = -1
         self.last_packet_acked = -1
@@ -81,7 +115,12 @@ class GBNSocket(CustomSocket):
         self.logger.debug(f"Waiting for ack")
         self.socket.settimeout(self.PROCESS_TIMEOUT)
         data, address = self.socket.recvfrom(GBNPacket.HEADER_SIZE)
-        op_code, ack_number, _data = GBNPacket.parse_packet(data)
+        op_code, ack_number, chunk_number, _data = GBNPacket.parse_packet(data)
+        if chunk_number != self.chunk_number:
+            self.logger.debug(
+                f"Discarding packet with op_code {OperationCodes.op_name(op_code)} and seq_number {ack_number} from older chunk: {chunk_number}"
+            )
+            return
 
         if op_code == OperationCodes.ACK and self.valid_opposite_address(address):
             self.attemps = (
@@ -117,6 +156,7 @@ class GBNSocket(CustomSocket):
         packet = self.packet_type.generate_packet(
             op_code=OperationCodes.DATA,
             seq_number=self.last_packet_sent + 1,
+            chunk_number=self.chunk_number,
             data=payload,
         )
         self._send(packet)
@@ -127,3 +167,17 @@ class GBNSocket(CustomSocket):
     def close_connection(self, confirm_close=False):
         self.socket.close()
         self.logger.info("Connection closed successfully")
+
+    def receive_end_ack(self):
+        while True:
+            data, address = self.socket.recvfrom(self.packet_type.MAX_PACKET_SIZE)
+            op_code, seq_number, chunk_number, data = self.packet_type.parse_packet(
+                data
+            )
+            if (
+                op_code == OperationCodes.END_ACK
+                and self.valid_opposite_address(address)
+                and self.valid_chunk_number(chunk_number)
+            ):
+                self.logger.debug(f"Received nsq ack with seq_number {seq_number}")
+                return

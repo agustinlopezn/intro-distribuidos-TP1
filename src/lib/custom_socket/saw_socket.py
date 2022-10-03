@@ -19,6 +19,12 @@ class SaWSocket(CustomSocket):
         )
         self._send(packet)
 
+    def generate_packet(self, op_code, data=b""):
+        packet = self.packet_type.generate_packet(
+            op_code=op_code, seq_number=self.seq_number, data=data
+        )
+        return packet
+
     def send_data(self, data):
         op_code = OperationCodes.DATA
         max_packet_size = SaWPacket.MAX_PAYLOAD_SIZE
@@ -68,3 +74,12 @@ class SaWSocket(CustomSocket):
         self.logger.debug("Sending final acks")
         for _ in range(self.MAX_ATTEMPS):
             self.send_ack()
+
+    def receive_sv_information(self):
+        while True:
+            data, address = self.socket.recvfrom(self.packet_type.MAX_PACKET_SIZE)
+            op_code, seq_number, parsed_data = self.packet_type.parse_packet(data)
+            if op_code == OperationCodes.SV_INTRODUCTION:
+                self.logger.debug(f"Received server information: {parsed_data}")
+                self.opposite_address = address
+                return parsed_data

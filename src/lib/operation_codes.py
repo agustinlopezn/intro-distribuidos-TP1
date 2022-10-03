@@ -7,8 +7,9 @@ class OperationCodes:
     DATA = 3
     ACK = 4
     NSQ_ACK = 5
-    END = 6
-    ERROR = 7
+    END_ACK = 6
+    END = 7
+    ERROR = 8
 
     OPERATION_NAMES = [
         "DOWNLOAD",
@@ -17,6 +18,7 @@ class OperationCodes:
         "DATA",
         "ACK",
         "NSQ_ACK",
+        "END_ACK",
         "END",
         "ERROR",
     ]

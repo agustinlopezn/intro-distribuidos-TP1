@@ -35,6 +35,7 @@ class FileReceiver(FileHandler):
                     )
                 return True
         except Exception as e:
+            raise e
             if bytes_received == self.file_size:
                 self.logger.warning(
                     f"File {file_name} received successfully but something went wrong at the end"

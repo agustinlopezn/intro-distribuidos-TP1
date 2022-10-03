@@ -35,12 +35,6 @@ class CustomSocket:
         packet = self.generate_packet(op_code=OperationCodes.NSQ_ACK)
         self._send(packet)
 
-    def generate_packet(self, op_code, data=b""):
-        packet = self.packet_type.generate_packet(
-            op_code=op_code, seq_number=self.seq_number, data=data
-        )
-        return packet
-
     def _send(self, packet):
         seq_number = self.packet_type.get_seq_number(packet)
         self.logger.debug(
@@ -70,32 +64,38 @@ class CustomSocket:
     #     RECEIVING METHODS     #
     #############################
 
-    def receive_ack(self, expected_op_code):
+    def receive_ack(self):
         while True:
             data, address = self.socket.recvfrom(self.packet_type.MAX_PACKET_SIZE)
-            op_code, seq_number, data = self.packet_type.parse_packet(data)
-            if expected_op_code != op_code:
-                continue
+            op_code = self.packet_type.get_op_code(data)
+            seq_number = self.packet_type.get_seq_number(data)
+            if op_code == OperationCodes.ACK and self.valid_packet(address, seq_number):
+                self.logger.debug(f"Received ack with seq_number {seq_number}")
+                self.update_seq_number()
+                return
+
+    def receive_nsq_ack(self):
+        while True:
+            data, address = self.socket.recvfrom(self.packet_type.MAX_PACKET_SIZE)
+            op_code = self.packet_type.get_op_code(data)
+            seq_number = self.packet_type.get_seq_number(data)
             if op_code == OperationCodes.NSQ_ACK and self.valid_opposite_address(
                 address
             ):
                 self.logger.debug(f"Received nsq ack with seq_number {seq_number}")
-                return data
-            if op_code == OperationCodes.ACK and self.valid_packet(address, seq_number):
-                self.logger.debug(f"Received ack with seq_number {seq_number}")
-                self.update_seq_number()
-                return data
+                return
 
     def receive_response(self, expected_op_code):
         if expected_op_code is None:
             raise Exception("Expected op_code must be specified")
         if expected_op_code == OperationCodes.SV_INTRODUCTION:
             return self.receive_sv_information()
-        if (
-            expected_op_code == OperationCodes.NSQ_ACK
-            or expected_op_code == OperationCodes.ACK
-        ):
-            return self.receive_ack(expected_op_code)
+        if expected_op_code == OperationCodes.ACK:
+            return self.receive_ack()
+        if expected_op_code == OperationCodes.NSQ_ACK:
+            return self.receive_nsq_ack()
+        if expected_op_code == OperationCodes.END_ACK:
+            return self.receive_end_ack()
 
     #############################
     #     HANDSHAKE METHODS     #
@@ -121,15 +121,6 @@ class CustomSocket:
             self.logger.debug(
                 "Server information not acknowledged. Starting process anyway"
             )
-
-    def receive_sv_information(self):
-        while True:
-            data, address = self.socket.recvfrom(self.packet_type.MAX_PACKET_SIZE)
-            op_code, seq_number, parsed_data = self.packet_type.parse_packet(data)
-            if op_code == OperationCodes.SV_INTRODUCTION:
-                self.logger.debug(f"Received server information: {parsed_data}")
-                self.opposite_address = address
-                return parsed_data
 
     def receive_first_connection(self):
         msg, client_address = self.socket.recvfrom(self.packet_type.MAX_PACKET_SIZE)
