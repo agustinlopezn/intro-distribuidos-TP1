@@ -30,7 +30,7 @@ class ClientFileSender(FileSender):
         self.logger.info(
             f"Starting file sending process for file {self.file_name} located in {self.source_path}"
         )
-        # input(f"Client port is {self.socket.port}")
+        input(f"Client port is {self.socket.port}. Press enter to start request...")
         self.handle_handshake()
         file_sent_success = self.send_file(f"{self.source_path}")
         self.socket.close_connection()

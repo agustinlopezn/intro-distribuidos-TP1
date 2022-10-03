@@ -38,7 +38,7 @@ class CustomSocket:
     def _send(self, packet):
         seq_number = self.packet_type.get_seq_number(packet)
         self.logger.debug(
-            f"Sending packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number} from port {self.port}"
+            f"Sending packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number} from chunk {self.chunk_number}"
         )
         if self.saboteur.sabotage_packet(packet):
             return
@@ -46,7 +46,7 @@ class CustomSocket:
             self.socket.sendto(packet, self.opposite_address)
         except PermissionError as e:
             self.logger.warning(
-                f"Dropping packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number}"
+                f"Dropping packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number} from chunk {self.chunk_number}"
             )
 
     def _send_and_wait(self, op_code, data, expected_op_code=None):

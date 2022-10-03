@@ -14,6 +14,7 @@ class ClientFileReceiver(FileReceiver):
         self.logger.info(
             f"Starting file receiving process for file {self.file_name} to be stored in {self.destination_path}"
         )
+        input(f"Client port is {self.socket.port}. Press enter to start request...")
         self.handle_process_start()
         if self.file_size == -1:
             self.logger.error(f"File {self.file_name} not found on server")

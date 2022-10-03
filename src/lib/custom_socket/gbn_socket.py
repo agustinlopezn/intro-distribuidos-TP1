@@ -40,8 +40,15 @@ class GBNSocket(CustomSocket):
     def update_seq_number(self):
         self.seq_number += 1
 
-    def send_end_ack(self):
-        self._send(self.generate_packet(OperationCodes.END_ACK))
+    def send_end_ack(self, end_chunk_number=None):
+        chunk_number = end_chunk_number or self.chunk_number
+        package = self.packet_type.generate_packet(
+            op_code=OperationCodes.END_ACK,
+            seq_number=self.seq_number,
+            chunk_number=chunk_number,
+            data="".encode(),
+        )
+        self._send(package)
 
     def receive_sv_information(self):
         while True:
@@ -67,9 +74,15 @@ class GBNSocket(CustomSocket):
             data, address = self.socket.recvfrom(GBNPacket.MAX_PACKET_SIZE)
             op_code, seq_number, chunk_number, data = GBNPacket.parse_packet(data)
             self.logger.debug(
-                f"[DATA] Received packet from port {address[1]} with seq_number {seq_number} and op_code {OperationCodes.op_name(op_code)}"
+                f"[DATA] Received packet from port {address[1]} with seq_number {seq_number} and op_code {OperationCodes.op_name(op_code)} from chunk {chunk_number}"
             )
             if chunk_number != self.chunk_number:
+                if op_code == OperationCodes.END:
+                    self.logger.debug(
+                        f"Received END packet from previous chunk: {chunk_number}. Sending end ack for that chunk"
+                    )
+                    self.send_end_ack(chunk_number)
+                    continue
                 self.logger.debug(
                     f"Discarding packet with op_code {OperationCodes.op_name(op_code)} and seq_number {self.seq_number} from older chunk: {chunk_number}"
                 )
@@ -82,8 +95,7 @@ class GBNSocket(CustomSocket):
                 else:
                     self.send_ack()
             elif op_code == OperationCodes.END:
-                for i in range(self.MAX_ATTEMPS):
-                    self.send_end_ack()
+                self.send_end_ack()
                 break
         return b"".join(packages)
 
