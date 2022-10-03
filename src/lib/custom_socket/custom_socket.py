@@ -61,7 +61,10 @@ class CustomSocket:
                 return data
             except timeout:
                 self.logger.warning("TIMEOUT! Retrying...")
-        raise Exception("Connection timed out")
+        self.logger.error(
+            "Maximum number of attempts reached. No communication possible"
+        )
+        raise ConnectionRefusedError
 
     #############################
     #     RECEIVING METHODS     #

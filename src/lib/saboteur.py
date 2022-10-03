@@ -4,7 +4,7 @@ import time
 from src.lib.operation_codes import OperationCodes
 
 DELAY_PROBABILITY = 0
-DROP_PROBABILITY = 0
+DROP_PROBABILITY = 0.1
 DUPLICATION_PROBABILITY = 0
 
 

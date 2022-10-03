@@ -6,10 +6,10 @@ from .custom_socket import CustomSocket, timeout
 
 class GBNSocket(CustomSocket):
     RWND = 20
-    MAX_ATTEMPS = 10
+    MAX_ATTEMPS = 25
     TIMEOUT = 10 / 1000
-    PROCESS_TIMEOUT = 20 / 1000  # Capaz se usa el timeout del custom socket
-    MAX_RECEVING_TIME = 3  # max time to wait for data, then it breaks the connection
+    MAX_RECEVING_TIME = (MAX_ATTEMPS * TIMEOUT + TIMEOUT) * 3
+    # max time to wait for data, then it breaks the connection
 
     def __init__(self, **kwargs):
         super().__init__(seq_number=-1, packet_type=GBNPacket, **kwargs)
@@ -69,7 +69,7 @@ class GBNSocket(CustomSocket):
         self.logger.debug(f"Receiving chunk {self.chunk_number}")
         packages = []
         self.seq_number = -1
-        self.socket.settimeout(self.MAX_RECEVING_TIME)
+        self.set_timeout(self.MAX_RECEVING_TIME)
         while True:
             data, address = self.socket.recvfrom(GBNPacket.MAX_PACKET_SIZE)
             op_code, seq_number, chunk_number, data = GBNPacket.parse_packet(data)
@@ -134,7 +134,6 @@ class GBNSocket(CustomSocket):
 
     def wait_ack(self):
         self.logger.debug(f"Waiting for ack")
-        self.socket.settimeout(self.PROCESS_TIMEOUT)
         data, address = self.socket.recvfrom(GBNPacket.HEADER_SIZE)
         op_code, ack_number, chunk_number, _data = GBNPacket.parse_packet(data)
         if chunk_number != self.chunk_number:
@@ -144,9 +143,8 @@ class GBNSocket(CustomSocket):
             return
 
         if op_code == OperationCodes.ACK and self.valid_opposite_address(address):
-            self.attemps = (
-                self.MAX_ATTEMPS
-            )  # restarting timeout counter bc receiver is alive
+            self.attemps = self.MAX_ATTEMPS
+            # restarting timeout counter bc receiver is alive
             if (
                 ack_number > self.last_packet_acked
                 and ack_number <= self.last_packet_sent
