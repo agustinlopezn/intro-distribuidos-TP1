@@ -1,7 +1,7 @@
 from threading import Thread
 from time import time
+
 from src.lib.file_handler.file_sender.file_sender import FileSender
-from src.lib.operation_codes import OperationCodes
 
 
 class ServerFileSender(FileSender, Thread):

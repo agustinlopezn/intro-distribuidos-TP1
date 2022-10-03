@@ -1,9 +1,6 @@
-from .packet import Packet
-from src.lib.operation_codes import OperationCodes
-
-
 import socket
-import sys
+
+from .packet import Packet
 
 
 class GBNPacket(Packet):
@@ -13,12 +10,14 @@ class GBNPacket(Packet):
 
     @classmethod
     def generate_packet(cls, op_code, seq_number, chunk_number, data=b""):
-        seq_number = 2 ** 8 - 1 if seq_number == -1 else seq_number
+        seq_number = 2**8 - 1 if seq_number == -1 else seq_number
         new_chunk_number = socket.htons(chunk_number)
         try:
             chunk_seq_number = new_chunk_number.to_bytes(2, byteorder="big")
         except Exception as e:
-            import pdb; pdb.set_trace()
+            import pdb
+
+            pdb.set_trace()
         bytes = bytearray(cls.HEADER_SIZE + len(data))
         bytes[0] = op_code
         bytes[1] = seq_number  # need a more generic name
@@ -30,7 +29,7 @@ class GBNPacket(Packet):
     def parse_packet(cls, packet):
         op_code = packet[0]
         seq_number = packet[1]
-        seq_number = -1 if seq_number == 2 ** 8 - 1 else seq_number
+        seq_number = -1 if seq_number == 2**8 - 1 else seq_number
         bytes_chunk_number = packet[2:4]
         chunk_number = int.from_bytes(bytes_chunk_number, byteorder="big", signed=False)
         chunk_number = socket.ntohs(chunk_number)

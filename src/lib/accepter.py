@@ -8,7 +8,7 @@ load_dotenv()
 
 class Accepter:
     def __init__(self, **kwargs):
-        socket_type = SaWSocket if os.getenv("SOCKET_TYPE") == "SaW" else GBNSocket
+        socket_type = SaWSocket if os.getenv("SOCKET_TYPE") == "SAW" else GBNSocket
         self.socket = socket_type(opposite_address=None, **kwargs)
         self.socket.set_timeout(None)
 

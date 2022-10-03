@@ -1,8 +1,6 @@
-from threading import Thread
-from src.lib.custom_socket.saw_socket import SaWSocket
-from src.lib.file_handler.file_receiver.file_receiver import FileReceiver
-from src.lib.operation_codes import OperationCodes
 from time import time
+
+from src.lib.file_handler.file_receiver.file_receiver import FileReceiver
 
 
 class ClientFileReceiver(FileReceiver):

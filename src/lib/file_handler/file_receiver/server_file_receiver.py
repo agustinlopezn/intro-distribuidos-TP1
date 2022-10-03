@@ -1,9 +1,7 @@
 from threading import Thread
-from src.lib.file_handler.file_receiver.file_receiver import FileReceiver
-from src.lib.file_handler.file_sender.file_sender import FileSender
-from src.lib.operation_codes import OperationCodes
-from socket import timeout
 from time import time
+
+from src.lib.file_handler.file_receiver.file_receiver import FileReceiver
 
 
 class ServerFileReceiver(FileReceiver, Thread):

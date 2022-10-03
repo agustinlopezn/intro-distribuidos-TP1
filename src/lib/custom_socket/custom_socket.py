@@ -1,7 +1,7 @@
-from socket import socket, AF_INET, SOCK_DGRAM, timeout
+from socket import AF_INET, SOCK_DGRAM, socket, timeout
+
 from src.lib.operation_codes import OperationCodes
 from src.lib.saboteur import Saboteur
-from src.lib.logger import Logger
 
 
 class CustomSocket:

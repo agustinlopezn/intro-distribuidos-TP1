@@ -1,6 +1,7 @@
-from src.lib.packet.gbn_packet import GBNPacket
-from .custom_socket import CustomSocket, timeout
 from src.lib.operation_codes import OperationCodes
+from src.lib.packet.gbn_packet import GBNPacket
+
+from .custom_socket import CustomSocket, timeout
 
 
 class GBNSocket(CustomSocket):
@@ -45,9 +46,12 @@ class GBNSocket(CustomSocket):
     def receive_sv_information(self):
         while True:
             data, address = self.socket.recvfrom(self.packet_type.MAX_PACKET_SIZE)
-            op_code, seq_number, chunk_number, parsed_data = self.packet_type.parse_packet(
-                data
-            )
+            (
+                op_code,
+                seq_number,
+                chunk_number,
+                parsed_data,
+            ) = self.packet_type.parse_packet(data)
             if op_code == OperationCodes.SV_INTRODUCTION:
                 self.logger.debug(f"Received server information: {parsed_data}")
                 self.opposite_address = address

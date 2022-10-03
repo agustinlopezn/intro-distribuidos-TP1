@@ -2,6 +2,7 @@ from sys import argv
 from src.lib.options import ServerOptions
 from src.server import Server
 
+
 def start_server():
     try:
         options = ServerOptions(argv[1:])
@@ -10,6 +11,7 @@ def start_server():
             return
         server = Server(options)
         server.daemon = True
+        print("Server running on port ", options.port)
         server.start()
 
         while True:
@@ -28,6 +30,6 @@ def start_server():
         input("Press enter to exit")
         exit(1)
 
+
 if __name__ == "__main__":
     start_server()
-
