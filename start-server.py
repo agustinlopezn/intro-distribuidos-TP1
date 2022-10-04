@@ -33,10 +33,17 @@ def start_server():
         server.start()
 
         while True:
-            quit = input("Press q to exit gracefully, then CTRL+C\n")
-            if quit == "q":
-                break
-        server.stop()
+            try:
+                quit = input("Press q to exit gracefully, then CTRL+C\n")
+                if quit == "q":
+                    break
+            except ValueError as e:
+                if "I/O operation on closed file" in str(e):
+                    raise InvalidOptionsError()
+        try:
+            server.stop()
+        except AttributeError:
+            pass
         server.join()
 
     except KeyboardInterrupt:
@@ -44,13 +51,12 @@ def start_server():
         exit(0)
 
     except InvalidOptionsError as e:
-        print("Error parsing options: ", e)
+        print(f"Error parsing options.{f' {e}' if e and str(e) else ''}")
         print_usage()
         exit(1)
 
     except:
         print("An unknown error occurred")
-        input("Press enter to exit")
         exit(1)
 
 

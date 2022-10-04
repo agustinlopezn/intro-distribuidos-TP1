@@ -20,7 +20,11 @@ class Server(Thread):
         self.options = options
 
     def run(self):
-        self.start_server()
+        try:
+            self.start_server()
+        except:
+            self.logger.error("Error parsing options")
+            exit(1)
 
     def stop(self):
         self.accepter.socket.close_connection()
