@@ -9,7 +9,6 @@ class OperationCodes:
     NSQ_ACK = 5
     END_ACK = 6
     END = 7
-    ERROR = 8
 
     OPERATION_NAMES = [
         "DOWNLOAD",
@@ -20,7 +19,6 @@ class OperationCodes:
         "NSQ_ACK",
         "END_ACK",
         "END",
-        "ERROR",
     ]
 
     @classmethod
