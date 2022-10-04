@@ -1,13 +1,11 @@
-# intro-distribuidos-TP1
+# Trabajo Práctico 1 - File Transfer - Introducción a los Sistemas Distribuidos
 
-Trabajo práctico de la materia Introducción a los Sistemas Distribuidos
+## Prerequisitos
 
-### Prerquisitos
+- [Python >=3.6](https://www.python.org/downloads/release/python-360/)
+- [Pip](https://pip.pypa.io/en/stable/installing/)
 
-* [Python 3.6](https://www.python.org/downloads/release/python-360/)
-* [Pip](https://pip.pypa.io/en/stable/installing/)
-
-### Instalación de librerías
+## Instalación de librerías
 
 (Aclaración) A partir de este punto, los siguientes comandos deben ejecutarse en la carpeta raíz del proyecto.
 
@@ -17,7 +15,7 @@ Para instalar las librerías requeridas, ejecutar:
 $ pip install -r requirements.txt
 ```
 
-### Iniciación del servidor
+## Iniciación del servidor
 
 Para iniciar el servidor, se debe ejecutar el siguiente comando:
 
@@ -31,7 +29,7 @@ Las opciones se enumeran utilizando el comando help:
 $ python3 start-server.py --help | -h
 ```
 
-### Iniciación del cliente (subida de archivos)
+## Iniciación del cliente (subida de archivos)
 
 Para realizar la subida de un archivo, se debe ejecutar el siguiente comando, asumiendo que el servidor ya está funcionando:
 
@@ -45,7 +43,7 @@ Las opciones se enumeran utilizando el comando help:
 $ python3 upload.py --help | -h
 ```
 
-### Iniciación del cliente (descarga de archivos)
+## Iniciación del cliente (descarga de archivos)
 
 Para realizar la descarga de un archivo, se debe ejecutar el siguiente comando, asumiendo que el servidor ya está funcionando:
 
