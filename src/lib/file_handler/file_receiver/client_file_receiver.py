@@ -22,7 +22,7 @@ class ClientFileReceiver(FileReceiver):
             return
 
         file_recvd_success = self.receive_file()
-        self.socket.close_connection(confirm_close=True)
+        self.socket.close_connection(confirm_close=file_recvd_success)
         finish_time = time()
         self.log_final_receive_status(file_recvd_success, finish_time - start_time)
 
