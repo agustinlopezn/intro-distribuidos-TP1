@@ -52,7 +52,9 @@ class CustomSocket:
                 f"Dropping packet with op_code {OperationCodes.op_name(packet[0])} and seq_number {seq_number} from chunk {self.chunk_number}"
             )
 
-    def _send_and_wait(self, op_code, data, expected_op_code=None):
+    def _send_and_wait(
+        self, op_code, data, expected_op_code=None, throw_exception=True
+    ):
         packet = self.generate_packet(op_code, data)
         for i in range(self.MAX_ATTEMPS):
             try:
@@ -61,9 +63,10 @@ class CustomSocket:
                 return data
             except timeout:
                 self.logger.warning("TIMEOUT! Retrying...")
-        self.logger.error(
-            "Maximum number of attempts reached. No communication possible"
-        )
+        if throw_exception:
+            self.logger.error(
+                "Maximum number of attempts reached. No communication possible"
+            )
         raise ConnectionRefusedError
 
     #############################
@@ -125,10 +128,10 @@ class CustomSocket:
         data = self.serialize_information(self.port, file_size, file_name)
         try:
             self._send_and_wait(
-                OperationCodes.SV_INTRODUCTION, data, OperationCodes.NSQ_ACK
+                OperationCodes.SV_INTRODUCTION, data, OperationCodes.NSQ_ACK, False
             )
-        except:
-            self.logger.debug(
+        except ConnectionRefusedError:
+            self.logger.warning(
                 "Server information not acknowledged. Starting process anyway"
             )
 

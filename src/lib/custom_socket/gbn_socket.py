@@ -105,18 +105,15 @@ class GBNSocket(CustomSocket):
     def valid_chunk_number(self, chunk_number):
         return chunk_number == self.chunk_number
 
-    def send_data(self, data):
-        self.chunk_number += 1
-        self.logger.debug(f"Sending chunk {self.chunk_number}")
-        self.attemps = self.MAX_ATTEMPS
-        self.last_packet_sent = -1
-        self.last_packet_acked = -1
+    def assemble_payloads(self, data):
         max_packet_size = GBNPacket.MAX_PAYLOAD_SIZE
         self.payloads = []
         for head in range(0, len(data), max_packet_size):
             payload = data[head : head + max_packet_size]
             self.payloads.append(payload)
         self.logger.debug(f"Sending {len(self.payloads)} packets")
+
+    def send_data_and_wait(self):
         while self.last_packet_acked < len(self.payloads) - 1:
             self.try_to_send_packets()
             try:
@@ -129,6 +126,16 @@ class GBNSocket(CustomSocket):
                 self.logger.warning(f"Handling timeout...")
                 self.last_packet_sent = self.last_packet_acked
                 self.logger.debug(f"Last packet sent: {self.last_packet_sent}")
+
+    def send_data(self, data):
+        self.chunk_number += 1
+        self.logger.debug(f"Sending chunk {self.chunk_number}")
+        self.attemps = self.MAX_ATTEMPS if self.chunk_number > 1 else self.MAX_ATTEMPS * 2
+        # contemplates the case of NSQ_ACK being dropped
+        self.last_packet_sent = -1
+        self.last_packet_acked = -1
+        self.assemble_payloads(data)
+        self.send_data_and_wait()
         self.logger.info("All payloads were acked")
         self.send_end()
 
