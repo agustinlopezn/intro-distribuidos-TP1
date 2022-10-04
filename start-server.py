@@ -1,5 +1,5 @@
 from sys import argv
-from src.lib.options import ServerOptions
+from src.lib.options import InvalidOptionsError, ServerOptions
 from src.server import Server
 
 
@@ -7,8 +7,7 @@ def start_server():
     try:
         options = ServerOptions(argv[1:])
         if options.show_help:
-            print("usage: start-server [-h] [-v | -q] [-H ADDR] [-p PORT] [-s DIRPATH]")
-            return
+            raise InvalidOptionsError()
         server = Server(options)
         server.daemon = True
         print("Server running on port ", options.port)
@@ -24,6 +23,11 @@ def start_server():
     except KeyboardInterrupt:
         print("\n-- Exiting --")
         exit(0)
+
+    except InvalidOptionsError as e:
+        print("Error parsing options: ", e)
+        print("Usage: start-server [-h] [-v | -q] [-H ADDR] [-p PORT] [-s DIRPATH]")
+        exit(1)
 
     except:
         print("An unknown error occurred")

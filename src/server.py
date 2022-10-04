@@ -3,7 +3,7 @@ from threading import Thread
 
 from src.lib.accepter import Accepter
 from src.lib.logger import Logger
-from src.lib.options import ServerOptions
+from src.lib.options import InvalidOptionsError, ServerOptions
 from src.lib.file_handler.file_sender.server_file_sender import ServerFileSender
 from src.lib.file_handler.file_receiver.server_file_receiver import ServerFileReceiver
 from src.lib.operation_codes import OperationCodes
@@ -28,12 +28,6 @@ class Server(Thread):
         self.logger.info("Threads joined successfully")
 
     def start_server(self):
-        if not self.options.valid():
-            print("Error: some options are invalid")
-            self.options.show_help = True
-        if self.options.show_help:
-            print("Usage: python3 start-server.py [-h] [-v] [-q] [-H host] [-p port]")
-            exit(0)
         self.prepare_execution()
         while True:
             op_code, client_address, file_data = self.accepter.accept()

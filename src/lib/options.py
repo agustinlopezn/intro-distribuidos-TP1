@@ -4,6 +4,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+class InvalidOptionsError(Exception):
+    pass
+
+
 class ExecutionOptions:
     DEFAULT_HOST = os.getenv("DEFAULT_HOST")
     DEFAULT_SERVER_PORT = os.getenv("DEFAULT_SERVER_PORT")
@@ -33,11 +37,14 @@ class ExecutionOptions:
             if "--port" in self.arguments
             else -1
         )
-        self.port = (
-            self.arguments[port_index + 1]
-            if port_index > -1
-            else int(self.DEFAULT_SERVER_PORT)
-        )
+        try:
+            self.port = (
+                int(self.arguments[port_index + 1])
+                if port_index > -1
+                else int(self.DEFAULT_SERVER_PORT)
+            )
+        except ValueError:
+            raise InvalidOptionsError("Port must be an integer")
 
 
 class ClientOptions(ExecutionOptions):
@@ -82,6 +89,8 @@ class UploadOptions(ClientOptions):
             if self.src_index > -1
             else self.DEFAULT_SRC_PATH + self.file_name
         )
+        if not self.valid():
+            raise InvalidOptionsError("Some options are invalid")
 
     def valid(self):
         return type(self.port) == int  # and os.path.isfile(self.src)
@@ -107,6 +116,8 @@ class DownloadOptions(ClientOptions):
             if self.dst_index > -1
             else self.DEFAULT_DEST_FILE_PATH + self.file_name
         )
+        if not self.valid():
+            raise InvalidOptionsError("Some options are invalid")
 
     def valid(self):
         return type(self.port) == int  # and os.path.isdir(self.dst)
@@ -132,6 +143,9 @@ class ServerOptions(ExecutionOptions):
             if self.storage_index > -1
             else self.DEFAULT_STORAGE
         )
+        if not self.valid():
+            self.show_help = True
+            raise InvalidOptionsError("Invalid storage options")
 
     def valid(self):
         return type(self.port) == int and os.path.isdir(self.storage)
