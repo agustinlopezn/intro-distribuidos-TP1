@@ -1,5 +1,5 @@
 import os
-from src.lib.file_handler.file_handler import FileHandler
+from lib.file_handler.file_handler import FileHandler
 
 
 class FileSender(FileHandler):

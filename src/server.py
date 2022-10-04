@@ -1,13 +1,13 @@
 from socket import *
 from threading import Thread
 
-from src.lib.accepter import Accepter
-from src.lib.logger import Logger
-from src.lib.options import InvalidOptionsError, ServerOptions
-from src.lib.file_handler.file_sender.server_file_sender import ServerFileSender
-from src.lib.file_handler.file_receiver.server_file_receiver import ServerFileReceiver
-from src.lib.operation_codes import OperationCodes
-from src.lib.thread_cleaner import ThreadCleaner
+from lib.accepter import Accepter
+from lib.logger import Logger
+from lib.options import InvalidOptionsError, ServerOptions
+from lib.file_handler.file_sender.server_file_sender import ServerFileSender
+from lib.file_handler.file_receiver.server_file_receiver import ServerFileReceiver
+from lib.operation_codes import OperationCodes
+from lib.thread_cleaner import ThreadCleaner
 from sys import argv
 
 MAX_FILE_SIZE = 1073741824  # 1GB, in bytes

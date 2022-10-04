@@ -1,8 +1,8 @@
 import os
 from time import time
 
-from src.lib.file_handler.file_sender.file_sender import FileSender
-from src.server import MAX_FILE_SIZE
+from lib.file_handler.file_sender.file_sender import FileSender
+from server import MAX_FILE_SIZE
 
 
 class ClientFileSender(FileSender):

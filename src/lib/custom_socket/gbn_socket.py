@@ -1,5 +1,5 @@
-from src.lib.operation_codes import OperationCodes
-from src.lib.packet.gbn_packet import GBNPacket
+from lib.operation_codes import OperationCodes
+from lib.packet.gbn_packet import GBNPacket
 
 from .custom_socket import CustomSocket, timeout
 
@@ -130,7 +130,9 @@ class GBNSocket(CustomSocket):
     def send_data(self, data):
         self.chunk_number += 1
         self.logger.debug(f"Sending chunk {self.chunk_number}")
-        self.attemps = self.MAX_ATTEMPS if self.chunk_number > 1 else self.MAX_ATTEMPS * 2
+        self.attemps = (
+            self.MAX_ATTEMPS if self.chunk_number > 1 else self.MAX_ATTEMPS * 2
+        )
         # contemplates the case of NSQ_ACK being dropped
         self.last_packet_sent = -1
         self.last_packet_acked = -1

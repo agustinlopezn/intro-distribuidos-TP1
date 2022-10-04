@@ -1,6 +1,6 @@
 from time import time
 
-from src.lib.file_handler.file_receiver.file_receiver import FileReceiver
+from lib.file_handler.file_receiver.file_receiver import FileReceiver
 
 
 class ClientFileReceiver(FileReceiver):

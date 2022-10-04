@@ -1,5 +1,5 @@
-from src.lib.options import InvalidOptionsError
-from src.client import Client, print_download_usage as print_usage
+from lib.options import InvalidOptionsError
+from client import Client, print_download_usage as print_usage
 
 
 if __name__ == "__main__":

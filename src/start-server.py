@@ -1,6 +1,6 @@
 from sys import argv
-from src.lib.options import InvalidOptionsError, ServerOptions
-from src.server import Server
+from lib.options import InvalidOptionsError, ServerOptions
+from server import Server
 
 
 def print_usage():

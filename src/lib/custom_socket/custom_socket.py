@@ -1,7 +1,7 @@
 from socket import AF_INET, SOCK_DGRAM, socket, timeout
 
-from src.lib.operation_codes import OperationCodes
-from src.lib.saboteur import Saboteur
+from lib.operation_codes import OperationCodes
+from lib.saboteur import Saboteur
 
 
 SEPARATOR_CHARACTER = "\0"

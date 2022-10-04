@@ -1,14 +1,14 @@
 import sys
 from socket import *
-from src.lib.logger import Logger
+from lib.logger import Logger
 
-from src.lib.custom_socket.saw_socket import SaWSocket
-from src.lib.options import DownloadOptions, UploadOptions
-from src.lib.file_handler.file_sender.client_file_sender import ClientFileSender
-from src.lib.file_handler.file_receiver.client_file_receiver import (
+from lib.custom_socket.saw_socket import SaWSocket
+from lib.options import DownloadOptions, UploadOptions
+from lib.file_handler.file_sender.client_file_sender import ClientFileSender
+from lib.file_handler.file_receiver.client_file_receiver import (
     ClientFileReceiver,
 )
-from src.lib.operation_codes import OperationCodes
+from lib.operation_codes import OperationCodes
 
 
 def print_upload_usage():
