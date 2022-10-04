@@ -1,5 +1,5 @@
 from src.lib.options import InvalidOptionsError
-from src.client import Client
+from src.client import Client, print_upload_usage as print_usage
 
 
 if __name__ == "__main__":
@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     except InvalidOptionsError as e:
         print("Error parsing options: ", e)
-        print("Usage: start-server [-h] [-v | -q] [-H ADDR] [-p PORT] [-s DIRPATH]")
+        print_usage()
         exit(1)
 
     except:
